@@ -1,0 +1,1950 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overscroll-behavior: none;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+  }
+
+  .header {
+    width: 100%;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    border-bottom: 2px solid #0047AB;
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    height: 70px;
+    margin-right: 10px;
+  }
+  
+  .text {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .school-name {
+    font-size: 18px;
+    color: #003366;
+    font-weight: bold;
+  }
+  
+  .alumni-title {
+    font-size: 24px;
+    color: #003366;
+    letter-spacing: 8px;
+    font-weight: bold;
+  }
+  
+  .menu img {
+    width: 30px;
+    cursor: pointer;
+  }
+  
+
+  .modal {
+    display: none;
+    position: fixed; 
+    top: 70px;
+    right: 20px;
+    background-color: #e6f0fa;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    flex-direction: column;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    width: 120px;
+    z-index: 1000;
+  }
+  
+  .modal a {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #003366;
+    font-size: 14px;
+  }
+  
+  .modal a:hover {
+    background-color: #dce6f5;
+  }
+  
+  .show {
+    display: flex;
+  }
+  
+  .banner {
+    position: relative;
+    height: 250px;
+    background: url('images/plpasigg.jpg') center/cover no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .banner .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 47, 108, 0.6);
+    z-index: 1;
+  }
+  
+  .banner h1 {
+    position: relative;
+    color: white;
+    font-size: 36px;
+    text-align: center;
+    font-weight: bold;
+    z-index: 2;
+  }
+  
+ 
+  .info-section {
+    padding: 50px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    background-color: #f5f5f5;
+  }
+  
+  .info-card {
+    background-color: #f9f9f9;
+    padding: 30px;
+    width: 300px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .info-card h3 {
+    color: #003366;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-decoration: underline;
+  }
+  
+  .card-content {
+    background-color: #0047AB;
+    height: 180px;
+    border-radius: 5px;
+  }
+  
+  .footer {
+    position: relative;
+    background: url('images/plpasigg.jpg') center/cover no-repeat;
+    padding: 30px 20px;
+    color: white;
+    overflow: hidden;
+  }
+  
+  .footer .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 47, 108, 0.6);
+    z-index: 1;
+  }
+  
+  .contact-us {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .contact-us h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .contact-us p {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  /* Register Section */
+  .register-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  
+  .register-form {
+    background-color: #e6f0fa;
+    padding: 30px 40px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 900px;
+  }
+  
+  .register-form h2 {
+    color: #003366;
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 26px;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 30px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .radio-group {
+    display: flex;
+    gap: 20px;
+    margin-top: 5px;
+  }
+  
+  .radio-group label {
+    font-size: 14px;
+    color: #003366;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    padding: 8px 10px;
+    border: 1px solid #003366;
+    border-radius: 4px;
+    outline: none;
+    font-size: 14px;
+  }
+  
+  input[type="text"]::placeholder,
+  input[type="email"]::placeholder,
+  input[type="password"]::placeholder {
+    color: #aaa;
+    font-size: 13px;
+  }
+
+  
+  .form-buttons {
+    margin-top: 25px;
+    justify-content: center;
+    display: flex;
+    gap: 15px;
+  }
+  
+  .register-btn {
+    background-color: #0047AB;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .reset-btn {
+    background-color: #f08080;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .login-link {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #003366;
+  }
+  
+  .login-link a {
+    color: #0047AB;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+.login-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    margin-top: 75px;
+}
+
+.login-container {
+    background-color: #e6f0fa;
+    border-radius: 20px;
+    display: flex;
+    padding: 30px;
+    gap: 50px;
+    max-width: 900px;
+    width: 100%;
+    height: 500px;
+    align-items: center;
+}
+
+.login-image img {
+    width: 400px;
+    height: 400px;
+    object-fit: cover; 
+    border-radius: 20px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.login-form h2 {
+    color: #003366;
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 26px;
+}
+
+.login-form .form-group {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"] {
+    padding: 10px 12px;
+    border: 1px solid #003366;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+    width: 100%; 
+    box-sizing: border-box; 
+}
+
+
+.login-form .show-password {
+    position: absolute;
+    bottom: -25px;
+    right: 10px;
+    font-size: 14px;
+    color: #003366;
+    font-family: Arial, sans-serif; 
+}
+
+
+.login-form input[type="checkbox"] {
+    width: auto; 
+    height: auto; 
+    margin: 0; /
+}
+
+.login-btn {
+    background-color: #0047AB;
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.register-link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #003366;
+}
+
+.register-link a {
+    color: #0047AB;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.interface-header {
+    background-color: #004aad;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: 90px; 
+}
+
+.interface-header .school-name{
+color: white;
+}
+
+.interface-header .alumni-title{
+    color: white;
+    }
+.logo-interface {
+    height: 70px;
+    margin-right: 10px;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.banner-interface {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: url('images/plpasigg.jpg') center/cover no-repeat;
+    margin-top: 100px; 
+    z-index: 0;
+}
+
+.banner-interface::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(62, 93, 247, 0.6); 
+    z-index: 1;
+}
+
+
+
+.sidebar {
+    background-color: #f0f6ff; 
+    width: 220px;
+    height: calc(100vh - 90px);
+    position: fixed;
+    top: 90px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    z-index: 5;
+    overflow: hidden;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid #d9e5f6;
+}
+
+.sidebar-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    padding: 0 0 20px 0;
+    
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    display: none;
+}
+
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 25px 0;
+    padding: 0 10px;
+    width: 100%;
+}
+
+.profile-pic {
+    position: relative;
+    margin-bottom: 15px;
+    text-align: center;
+    width: 100%; 
+}
+
+.profile-pic img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    cursor: pointer;
+    object-fit: cover;
+    border: 3px solid #b7d0ff;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-name {
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #004aad;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn {
+    background-color: #e1ecff;
+    color: #004aad;
+    width: 100%;
+    text-align: right;
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    border-bottom: 1px solid #d9e5f6;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background-color: #d0e1ff;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.sidebar-content a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: #333;
+    text-decoration: none;
+    padding: 14px 20px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Special handling for profile picture link */
+.profile-section .profile-pic {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 15px;
+    text-align: center;
+    border-bottom: none;
+}
+
+/* Override flex properties for profile picture link */
+.sidebar-content .profile-section a.profile-pic {
+    display: block;
+    text-align: center;
+    padding: 0;
+    border-bottom: none;
+    width: 100%;
+}
+
+/* Remove flex properties from profile pic link */
+.profile-section .profile-pic a {
+    display: inline-block;
+    width: auto;
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+/* Ensure hover effects don't affect profile pic */
+.profile-section .profile-pic a:hover,
+.sidebar-content .profile-section a.profile-pic:hover {
+    background-color: transparent;
+    padding-left: 0;
+}
+
+.sidebar-content a img {
+    width: 22px;
+    height: 22px;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.sidebar-content a span {
+    transition: all 0.3s ease;
+    font-size: 15px;
+}
+
+.sidebar-content a:hover {
+    background-color: #d0e1ff;
+    color: #004aad;
+    padding-left: 25px;
+}
+
+.sidebar-content a:hover img {
+    opacity: 1;
+}
+
+.sidebar-content a.active {
+    background-color: #004aad;
+    color: white;
+    border-left: 4px solid #002855;
+}
+
+.sidebar-content a.active img {
+    filter: brightness(0) invert(1);
+    opacity: 1;
+}
+
+/* Collapsed sidebar styles */
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar.collapsed .profile-pic img {
+    width: 50px;
+    height: 50px;
+    border-width: 2px;
+}
+
+/* Explicitly define expanded state to ensure proper sizing */
+.sidebar:not(.collapsed) .profile-pic img {
+    width: 100px;
+    height: 100px;
+    border-width: 3px;
+}
+
+.sidebar.collapsed .profile-name {
+    font-size: 0;
+    margin: 0;
+    height: 0;
+}
+
+.sidebar.collapsed .sidebar-content a {
+    justify-content: center;
+    padding: 15px 0;
+}
+
+.sidebar.collapsed .sidebar-content a img {
+    margin: 0;
+    width: 24px;
+    height: 24px;
+}
+
+.sidebar.collapsed .sidebar-content a span {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+
+.sidebar.collapsed .toggle-btn {
+    text-align: center;
+    padding: 12px 0;
+}
+
+.main-content {
+    margin-left: 220px;
+    padding: 20px 20px 20px 40px;
+    position: relative;
+    z-index: 2;
+    margin-top: 90px;
+    overflow-y: auto;
+    max-height: calc(100vh - 90px);
+    transition: all 0.3s ease;
+}
+
+.sidebar.collapsed ~ .main-content {
+    margin-left: 80px;
+    padding-left: 20px;
+}
+
+.main-content h2 {
+    color: white;
+    background-color: #003B5C;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+
+.event {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 600px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    
+}
+
+.event-img img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px; 
+}
+
+.event-details {
+    flex: 1; 
+}
+
+.event-details h3 {
+    margin-bottom: 10px;
+}
+
+.event-details p {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.read-more {
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.read-more:hover {
+    background-color: #0056b3;
+}
+
+/* Alumni Home Modal Styles */
+.alumni-home-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding-top: 60px;
+}
+
+.alumni-home-modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 500px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+}
+
+.join-btn {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.join-btn:hover {
+  background-color: #0056b3;
+}
+
+
+/* JOB HEADER */
+.job-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.job-header h1 {
+  font-size: 40px;
+  font-weight: bold;
+  color: #002366;
+  text-decoration: underline;
+  margin-bottom: 10px;
+}
+
+.post-job-btn {
+  background-color: #003399;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 25px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* SEARCH BAR */
+.search-bar {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.search-bar input {
+  padding: 10px 30px 10px 40px;
+  border: 2px solid #003399;
+  border-radius: 20px;
+  outline: none;
+  width: 300px;
+  background: #fff url('images/search-icon.png') no-repeat 10px center;
+  background-size: 20px;
+}
+
+/* alumni JOB */
+.job-cards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.job-card {
+  background-color: #99ccff;
+  padding: 30px;
+  width: 800px;
+  border-radius: 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.job-card h2 {
+  text-align: center;
+  color: #002366;
+  font-size: 28px;
+  margin-bottom: 10px;
+  background-color: #99ccff; 
+  display: inline-block;    
+  padding: 5px 20px;        
+  border-radius: 10px;   
+  text-align: center;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);   
+}
+
+
+.job-meta {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 20px;
+}
+
+.job-meta div {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  color: #002366;
+}
+
+.job-meta img {
+  height: 15px;
+  width: 15px;
+  margin-right: 8px;
+}
+
+.job-card p {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* JOB FOOTER */
+.job-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.posted-by {
+  background-color: #003399;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.read-more {
+  background-color: #003399;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.search-bar img {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-left: -35px;
+  cursor: pointer;
+}
+
+.icon-job {
+  width: 18px;  
+  height: 18px; 
+  margin-right: 8px; 
+  filter:
+    brightness(0)        
+    saturate(100%)       
+    invert(27%)          
+    sepia(97%)          
+    saturate(4855%)     
+    hue-rotate(196deg)   
+    brightness(90%)      
+    contrast(94%);       
+}
+
+/* Alumni Job Modal Styling */
+.alumni-modal {
+  display: none; 
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.alumni-job-modal-content {
+  background-color: #ffffff;
+  margin: 5% auto;
+  padding: 40px;
+  width: 60%;
+  max-width: 700px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  color: #002366;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  box-sizing: border-box;
+}
+
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #003399;
+}
+
+
+.alumni-job-modal-content h2 {
+  font-size: 28px;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #003399;
+}
+
+
+.alumni-job-modal-content p {
+  margin-bottom: 18px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.alumni-job-modal-content p strong {
+  display: inline-block;
+  width: 120px;
+  color: #003399;
+}
+
+
+.close-button:hover {
+  color: #000;
+}
+
+#postJobForm input,
+#postJobForm textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+#postJobForm label {
+  font-weight: bold;
+  color: #003399;
+}
+
+.export-pdf-btn {
+    display: inline-block;
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-left: 10px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.export-pdf-btn:hover {
+    background-color: #c0392b;
+    color: white;
+}
+
+.export-pdf-btn i {
+    margin-right: 5px;
+}
+
+/* Admin Home */
+
+.main-content header{
+  font-weight: bold;
+  color:#00276b;
+  font-size: 30px;
+  padding: 10px;
+}
+
+.main-content div{
+  padding: 10px;
+  margin: 3px;
+}
+
+.main-content img{
+  width: 140px;
+  height: 140px;
+}
+
+.division{
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.divs{
+  flex: 1;
+  background: #9bd1fb;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+  min-width: 150px;
+
+}
+
+.gallery-content {
+  margin-left: 220px;
+  padding: 20px 20px 20px 40px;
+  position: relative;
+  z-index: 2;
+  margin-top: 90px; 
+  max-height: calc(100vh - 90px);
+}
+
+.sidebar.collapsed ~ .gallery-content {
+  margin-left: 80px;
+  padding-left: 20px;
+}
+
+.gallery-section {
+  background-color: #fff;
+  padding: 40px 0;
+  text-align: center;
+  top: 80px; 
+}
+
+.gallery-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 0 40px;
+}
+
+
+.gallery-box {
+  background-color: #9bd1fb;
+  border-radius: 25px;
+  width: 500px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  min-height: 200px;
+}
+
+
+.gallery-box img {
+  width: 180px;
+  height: 180px;
+  border-radius: 20px;
+  object-fit: cover;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+
+.gallery-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+
+.gallery-text h3 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #003893;
+  margin-bottom: 10px;
+}
+
+
+.gallery-text p {
+  font-size: 14px;
+  color: #000;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+
+.read-more-btn {
+  background-color: #003893;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: start;
+  margin-top: auto;
+}
+
+.read-more-btn:hover {
+  background-color: #00276b;
+}
+
+.gallery-modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.gallery-modal-content {
+  background-color: white;
+  margin: 15% auto;
+  padding: 20px; 
+  border: 1px solid #888;
+  width: 80%;  
+  max-width: 600px;  
+  border-radius: 10px; 
+}
+
+.gallery-modal-content h3 {
+  font-size: 22px;  
+  color: #003893;  
+  margin-bottom: 15px;  
+}
+
+.gallery-modal-content p {
+  font-size: 16px; 
+  color: #000;
+  margin-bottom: 20px;  
+  line-height: 1.6;  
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#al-content {
+  display: flex;
+  position: relative;
+}
+
+.al-main-content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: white;
+  margin-left: 230px;
+  margin-top: 90px;
+}
+
+.sidebar.collapsed ~ .al-main-content {
+  margin-left: 100px;
+}
+
+.al-main-content header {
+  font-size: 26px;
+  padding: 5px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+
+.alist-search {
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+.alist-filter {
+  float: right;
+  width: 75px;
+  height: 35px;
+  margin-bottom: 5px;
+}
+
+
+.table-alist table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-alist th,
+.table-alist td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+}
+
+
+.table-alist button,
+.btn-edit {
+  width: 75px;
+  height: 35px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 2px;
+  text-align: center;
+  display: inline-block;
+}
+
+.btn-save {
+  background-color: #28a745; 
+}
+
+.btn-edit {
+  background-color: #ffc107; 
+  color: black;
+  text-decoration: none;
+  line-height: 35px;
+}
+
+.btn-delete {
+  background-color: #dc3545; 
+}
+
+.list-foot {
+  background: #ebecf1;
+  padding: 20px;
+}
+
+.list-foot label {
+  font-size: 16px;
+}
+
+.previous-next {
+  float: right;
+}
+
+button.admin-course-list-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+button.admin-course-list-btn.edit {
+  background-color: #ffcc00;  
+  color: white;
+}
+
+button.admin-course-list-btn.delete {
+  background-color: #ff4d4d;  
+  color: white;
+}
+
+
+button.admin-course-list-btn.edit:hover {
+  background-color: #e6b800; 
+}
+
+button.admin-course-list-btn.delete:hover {
+  background-color: #e60000;
+}
+
+
+.admin-course-list-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none; 
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.admin-course-list-modal {
+  background-color: #fff;
+  padding: 30px;
+  width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.admin-course-list-modal h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #004aad;
+}
+
+.admin-course-list-modal label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.admin-course-list-modal input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.admin-course-list-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-course-list-modal-buttons button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.admin-course-list-modal-buttons .save {
+  background-color: #004aad;
+  color: white;
+}
+
+.admin-course-list-modal-buttons .cancel {
+  background-color: #ccc;
+  color: black;
+}
+
+.main-content p{
+  padding: 10px;
+}
+
+.manage-profile{
+  display: flex;
+  height: 100vh;
+  
+}
+
+.profile-container{
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top:50px;
+  justify-content: center;
+  height: 70%;
+  background: #a2bffe;
+}
+
+
+.info{
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+}
+
+.pfp{
+  width: 200px;
+  height: 200px;
+}
+
+.pfp-picture{
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+
+}
+
+.change-pfp{
+  width: 150px;
+  padding: 5px;
+  background-color: #004aad;
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+
+}
+
+
+.form-profile{
+  display: flex;
+  align-items: center;
+  gap: 10px 20px;
+  
+}
+
+.profile-form{
+  margin-top: 20px;
+  gap: 20px;
+}
+
+
+.form-profile input[type="text"],
+.form-profile input[type="number"],
+.form-profile input[type="email"],
+.form-profile input[type="password"],
+.form-profile select {
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.form-profile input[type="radio"] {
+  margin-right: 5px;
+}
+
+.form-profile label{
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.profile-form button {
+  width: 150px;
+  padding: 10px;
+  background-color: #004aad;
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.content {
+  margin-left: 220px;
+  padding: 20px;
+  margin-top: 90px; 
+}
+
+.sidebar.collapsed ~ .content {
+  margin-left: 80px;
+}
+
+
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.table-controls select, .table-controls input[type="text"] {
+  padding: 5px;
+  font-size: 14px;
+}
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+table th {
+  background-color: #d9e5f6;
+}
+
+table img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+
+.save-btn, .edit-btn, .delete-btn {
+  padding: 6px 12px;
+  margin: 2px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  font-size: 14px;
+}
+
+.save-btn {
+  background-color: #007BFF;
+  color: white;
+}
+
+.edit-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+
+.edit-btn {
+  cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 5px 10px;
+  background-color: #d9e5f6;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.admin-gallery-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4); 
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+
+.modal-toggle:checked + .admin-gallery-modal {
+  display: flex;
+}
+
+
+.admin-gallery-content {
+  background-color: #d8e6f7; 
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+}
+
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #999;
+  background: white;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  resize: vertical;
+  background: white;
+  font-size: 14px;
+}
+
+.desc-label {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.save-btn {
+  background-color: #007bff; 
+  color: white;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancel-btn {
+  background-color: #ccc; 
+  color: black;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #0056b3;
+}
+
+.cancel-btn:hover {
+  background-color: #999;
+}
+
+
+.setting-content {
+  margin-left: 240px;
+  padding: 30px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  margin-top: 90px; 
+}
+
+.sidebar.collapsed ~ .setting-content {
+  margin-left: 100px;
+}
+
+.settings-form {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="file"],
+.form-group textarea {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #fff;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.preview-image {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-image img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin-top: 10px;
+}
+
+.save-button {
+  background-color: #00a6d6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: #007BFF;
+}
+
+.topic{
+  height: 300px;
+  margin:20px;
+  padding: 40px;
+  font-size: 20px;
+  background: #9bd1fb;
+  text-align: center;
+}
+
+.alumni-upload-content {
+  display: flex;
+  position: relative;
+  background-color: #f5f5f5;
+}
+
+.main-upload-area {
+  flex-grow: 1;
+  padding: 20px;
+  margin-left: 230px;
+  background-color: white;
+}
+
+.form-content {
+  margin-top: 20px;
+  background: #9bd1fb;
+  width: 500px;
+  height: 600px;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+.description label {
+  font-size: 20px;
+  margin-top: 20px;
+  display: block;
+}
+
+.description textarea {
+  margin-top: 10px;
+  width: 100%;
+  height: 250px;
+  resize: none;
+  font-size: 16px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.form-content input[type="file"] {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.upload-button {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.form-content button {
+  width: 95px;
+  height: 40px;
+  border: none;
+  background: #004aad;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.add-topic{
+  text-align: center;
+}
+
+.add-topic button{
+  position: absoulte;
+  font-weight: bold;
+  width: 250px;
+}
+
+.alumni-forums-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.alumni-forums-modal-content {
+  background:#9bd1fb;
+  padding: 2.5rem;
+  max-width: 768px;
+  width: 100%;
+  border-radius: 1.5rem;
+  position: relative;
+  overflow-y: auto;
+  max-height: 90vh;
+  border: 4px solid #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.alumni-forums-close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  color: #6b7280;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.alumni-forums-close-button:hover {
+  color: #111827;
+}
+
+.alumni-forums-icon-container {
+  background-color: #fdfdfd;
+  padding: 1rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.alumni-forums-modal-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: black;
+  margin-bottom: 1rem;
+}
+
+.alumni-forums-modal-divider {
+  border-top: 2px solid #c4b5fd;
+  width: 50%;
+  margin: 1rem auto;
+}
+
+.alumni-forums-modal-description {
+  font-size: 1.125rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.alumni-forums-comments-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 1rem;
+}
+
+.alumni-forums-comment-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem 0 0 0.5rem;
+  outline: none;
+}
+
+.alumni-forums-comment-button {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: bold;
+  padding: 0 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  transition: background 0.3s;
+}
+
+.alumni-forums-comment-button:hover {
+  background-color: #2563eb;
+}
+
+.hidden {
+  display: none !important;
+}
