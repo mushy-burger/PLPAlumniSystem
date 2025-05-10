@@ -80,7 +80,8 @@ function sendWelcomeEmail($email, $firstname, $lastname, $alumni_id, $random_pas
         
         $mail->Body = $message;
         
-        return $mail->send(); // Tanggalin para hindi mag send ng email 
+        
+        return $mail->send(); 
     } catch (Exception $e) {
         error_log("Email sending failed: " . $e->getMessage());
         return false;

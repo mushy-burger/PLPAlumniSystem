@@ -87,17 +87,24 @@ if (isset($_POST['action'])) {
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $event_id = intval($_GET['delete']);
     
-    $banner = $conn->query("SELECT banner FROM events WHERE id='$event_id'")->fetch_assoc()['banner'];
-    if($banner != 'no-image-available.png' && file_exists($banner)) {
-        unlink($banner);
-    }
+    $check_result = $conn->query("SELECT banner, gform_link FROM events WHERE id='$event_id'");
     
-    $sql = "DELETE FROM events WHERE id=$event_id";
-    
-    if ($conn->query($sql)) {
-        $_SESSION['success'] = "Event deleted successfully!";
+    if ($check_result && $check_result->num_rows > 0) {
+        $event_data = $check_result->fetch_assoc();
+        
+        if($event_data['banner'] != 'no-image-available.png' && file_exists($event_data['banner'])) {
+            unlink($event_data['banner']);
+        }
+        
+        $sql = "DELETE FROM events WHERE id=$event_id";
+        
+        if ($conn->query($sql)) {
+            $_SESSION['success'] = "Event deleted successfully!";
+        } else {
+            $_SESSION['error'] = "Error deleting event: " . $conn->error;
+        }
     } else {
-        $_SESSION['error'] = "Error deleting event: " . $conn->error;
+        $_SESSION['error'] = "Event not found.";
     }
     
     header("Location: admin-event.php");
@@ -484,6 +491,7 @@ if (!file_exists('uploads/events')) {
       
       document.getElementById('confirmDeleteBtn').addEventListener("click", () => {
           if(deleteId) {
+              // Proceed with the deletion regardless of Google Form link presence
               window.location.href = `admin-event.php?delete=${deleteId}`;
           }
       });
