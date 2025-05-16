@@ -109,6 +109,7 @@ function build_query_params($exclude = []) {
             <a href="admin-job.php" class="active"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
             <a href="admin-event.php"> <img src="images/calendar.png" alt="Events"><span>Events</span>
             <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
+            <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
             <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
             <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
         </div>

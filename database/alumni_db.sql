@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 10, 2025 at 08:23 AM
+-- Generation Time: May 16, 2025 at 08:48 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,24 @@ SET time_zone = "+00:00";
 --
 -- Database: `alumni_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `alumni_officers`
+--
+
+CREATE TABLE `alumni_officers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `class_year` varchar(10) DEFAULT NULL,
+  `course` varchar(255) DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `display_order` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -147,6 +165,15 @@ CREATE TABLE `events` (
   `date_created` datetime NOT NULL DEFAULT current_timestamp(),
   `gform_link` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`id`, `title`, `content`, `schedule`, `banner`, `date_created`, `gform_link`) VALUES
+(4, 'Test', 'test\r\n', '2025-05-17 01:48:00', 'no-image-available.png', '2025-05-17 01:48:44', ''),
+(5, 'test', 'test test', '2025-05-17 01:48:00', 'no-image-available.png', '2025-05-17 01:48:54', ''),
+(6, 'qweqweqweqwe', 'qweqweqweqweqwe', '2025-05-17 01:49:00', 'no-image-available.png', '2025-05-17 01:49:07', '');
 
 -- --------------------------------------------------------
 
@@ -321,6 +348,12 @@ INSERT INTO `users` (`id`, `alumni_id`, `name`, `username`, `password`, `type`, 
 --
 
 --
+-- Indexes for table `alumni_officers`
+--
+ALTER TABLE `alumni_officers`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `alumnus_bio`
 --
 ALTER TABLE `alumnus_bio`
@@ -379,6 +412,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `alumni_officers`
+--
+ALTER TABLE `alumni_officers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `alumnus_bio`
 --
 ALTER TABLE `alumnus_bio`
@@ -400,7 +439,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `event_commits`

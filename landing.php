@@ -33,6 +33,10 @@ if ($events_result->num_rows == 0) {
 // Get random gallery images (limit to 4)
 $gallery_query = "SELECT * FROM gallery ORDER BY RAND() LIMIT 4";
 $gallery_result = $conn->query($gallery_query);
+
+// Get alumni officers
+$officers_query = "SELECT * FROM alumni_officers ORDER BY display_order, position LIMIT 4";
+$officers_result = $conn->query($officers_query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,6 +47,53 @@ $gallery_result = $conn->query($gallery_query);
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
+    /* Header override to match style.css */
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      height: 70px !important;
+      margin-right: 10px !important;
+    }
+    
+    .text {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .school-name {
+      font-size: 18px !important;
+      color: #003366 !important;
+      font-weight: bold !important;
+      margin-bottom: 0 !important;
+      line-height: normal !important;
+      letter-spacing: normal !important;
+      text-shadow: none !important;
+    }
+    
+    .alumni-title {
+      font-size: 24px !important;
+      color: #003366 !important;
+      letter-spacing: 8px !important;
+      font-weight: bold !important;
+      text-transform: uppercase !important;
+      background: none !important;
+      -webkit-background-clip: initial !important;
+      -webkit-text-fill-color: initial !important;
+      background-clip: initial !important;
+      text-fill-color: initial !important;
+      position: static !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      text-shadow: none !important;
+    }
+    
+    .alumni-title:after {
+      display: none !important;
+    }
+    
     /* Additional styles for landing page */
     .hero-section {
       position: relative;
@@ -601,7 +652,7 @@ $gallery_result = $conn->query($gallery_query);
     .footer {
       position: relative;
       background: url('images/plpasigg.jpg') center/cover no-repeat;
-      padding: 50px 20px 30px;
+      padding: 30px 20px 20px;
       color: white;
     }
     
@@ -622,14 +673,14 @@ $gallery_result = $conn->query($gallery_query);
       margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 30px;
+      gap: 20px;
     }
     
     .footer-column h3 {
-      font-size: 18px;
-      margin-bottom: 15px;
+      font-size: 16px;
+      margin-bottom: 12px;
       position: relative;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
     }
     
     .footer-column h3::after {
@@ -637,33 +688,106 @@ $gallery_result = $conn->query($gallery_query);
       position: absolute;
       bottom: 0;
       left: 0;
-      width: 40px;
+      width: 30px;
       height: 2px;
       background-color: white;
     }
     
     .footer-column p, .footer-column a {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       display: block;
       color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       transition: color 0.3s ease;
-      font-size: 14px;
+      font-size: 13px;
     }
     
     .footer-column a:hover {
       color: white;
     }
     
+    .contact-info {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+    }
+    
+    .contact-info i {
+      margin-right: 5px;
+    }
+    
     .footer-bottom {
       position: relative;
       z-index: 2;
       text-align: center;
-      padding-top: 25px;
-      margin-top: 25px;
+      padding-top: 15px;
+      margin-top: 15px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 13px;
+      font-size: 12px;
       color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Social Media Icons */
+    .social-icons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .social-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      color: white;
+      font-size: 14px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .social-icon i {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.3s ease;
+      position: relative;
+      z-index: 3;
+    }
+    
+    .social-icon:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .social-icon:hover i {
+      color: #0047AB;
+    }
+    
+    .social-icon:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      border-radius: 50%;
+      z-index: 1;
+      transform: scale(0);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .social-icon:hover:after {
+      transform: scale(1);
     }
     
     /* Animations */
@@ -876,26 +1000,171 @@ $gallery_result = $conn->query($gallery_query);
       line-height: 1.6;
     }
     
-    /* Improved hamburger menu */
-    .hamburger-icon {
+    /* Alumni Officers Section Specific Styles */
+    .officers-section {
+      padding: 100px 20px;
+      background-color: #f0f5ff;
+    }
+    
+    .officers-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .officer-card {
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      width: 250px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .officer-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .officer-image {
+      height: 200px;
+      overflow: hidden;
+    }
+    
+    .officer-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .officer-card:hover .officer-image img {
+      transform: scale(1.05);
+    }
+    
+    .officer-info {
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .officer-info h3 {
+      color: #003366;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    
+    .officer-position {
+      display: block;
+      color: #0047AB;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    
+    .officer-info p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    
+    .text .alumni-title {
+      color: #0047AB;
+      font-size: 14px;
+      letter-spacing: 2px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-login-btn {
+      background-color: #0047AB;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .header-login-btn:hover {
+      background-color: #003366;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header-login-btn i {
+      font-size: 14px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      height: 70px !important;
+      margin-right: 10px !important;
+    }
+    
+    .text {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      width: 25px;
-      height: 18px;
+    }
+    
+    .school-name {
+      font-size: 18px !important;
+      color: #003366 !important;
+      font-weight: bold !important;
+      margin-bottom: 0 !important;
+      line-height: normal !important;
+      letter-spacing: normal !important;
+      text-shadow: none !important;
+    }
+    
+    .alumni-title {
+      font-size: 24px !important;
+      color: #003366 !important;
+      letter-spacing: 8px !important;
+      font-weight: bold !important;
+      text-transform: uppercase !important;
+      background: none !important;
+      -webkit-background-clip: initial !important;
+      -webkit-text-fill-color: initial !important;
+      background-clip: initial !important;
+      text-fill-color: initial !important;
+      position: static !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      text-shadow: none !important;
+    }
+    
+    .alumni-title:after {
+      display: none !important;
+    }
+    
+    /* Hamburger menu */
+    .menu {
       cursor: pointer;
-      transition: all 0.3s ease;
     }
     
-    .hamburger-icon span {
-      display: block;
-      height: 2px;
-      width: 100%;
-      background-color: #003366;
-      border-radius: 2px;
-      transition: all 0.3s ease;
+    .menu img {
+      width: 24px;
+      height: auto;
     }
     
+    /* Modal */
     .modal {
       display: none;
       position: fixed; 
@@ -951,18 +1220,7 @@ $gallery_result = $conn->query($gallery_query);
       <div class="alumni-title">ALUMNI</div>
     </div>
   </div>
-  <div class="menu" id="menuButton">
-    <div class="hamburger-icon">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
 </header>
-
-<div id="modal" class="modal">
-  <a href="login.php" class="modal-link"><i class="fas fa-sign-in-alt"></i> Sign In</a>
-</div>
 
 <section class="hero-section">
   <div class="overlay"></div>
@@ -1102,13 +1360,49 @@ $gallery_result = $conn->query($gallery_query);
   </div>
 </section>
 
+<section class="officers-section">
+  <h2 class="section-title">Alumni Officers</h2>
+  <div class="officers-container">
+    <?php if($officers_result && $officers_result->num_rows > 0): ?>
+      <?php while($officer = $officers_result->fetch_assoc()): ?>
+        <div class="officer-card">
+          <div class="officer-image">
+            <img src="<?php echo htmlspecialchars($officer['image_path']); ?>" alt="<?php echo htmlspecialchars($officer['name']); ?>" onerror="this.src='images/user.jpg'">
+          </div>
+          <div class="officer-info">
+            <h3><?php echo htmlspecialchars($officer['name']); ?></h3>
+            <span class="officer-position"><?php echo htmlspecialchars($officer['position']); ?></span>
+            <p>Class of <?php echo htmlspecialchars($officer['class_year']); ?>, <?php echo htmlspecialchars($officer['course']); ?></p>
+          </div>
+        </div>
+      <?php endwhile; ?>
+    <?php else: ?>
+      <div class="no-gallery-items">
+        <div class="no-content-message">
+          <i class="fas fa-users"></i>
+          <p>No alumni officers available yet. Check back soon for updates!</p>
+        </div>
+      </div>
+    <?php endif; ?>
+  </div>
+</section>
+
 <footer class="footer">
   <div class="overlay"></div>
   <div class="footer-content">
     <div class="footer-column">
       <h3>CONTACT US</h3>
-      <p><i class="fas fa-envelope"></i> <?php echo $system['email']; ?></p>
-      <p><i class="fas fa-phone"></i> <?php echo $system['contact']; ?></p>
+      <p class="contact-info"><i class="fas fa-envelope"></i> <?php echo $system['email']; ?> &nbsp;&nbsp;|&nbsp;&nbsp; <i class="fas fa-phone"></i> <?php echo $system['contact']; ?></p>
+    </div>
+    <div class="footer-column">
+      <h3>CONNECT WITH US</h3>
+      <div class="social-icons">
+        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+      </div>
     </div>
   </div>
   <div class="footer-bottom">
@@ -1124,6 +1418,11 @@ $gallery_result = $conn->query($gallery_query);
     <img id="eventImage" style="max-width:100%; margin-bottom:20px; border-radius:5px; display:none;" alt="Event Image">
     <div id="eventContent" style="line-height:1.6;"></div>
   </div>
+</div>
+
+<div id="modal" class="modal">
+  <a href="register.php" class="modal-link"><i class="fas fa-user-plus"></i> Register</a>
+  <a href="login.php" class="modal-link"><i class="fas fa-sign-in-alt"></i> Sign In</a>
 </div>
 
 <script>

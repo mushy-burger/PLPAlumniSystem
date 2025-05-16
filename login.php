@@ -41,12 +41,24 @@ if(isset($_POST['login'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8">  cc
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PLP Alumni - Log In</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* Override styles for back button icon */
+    .back-link .back-icon,
+    .back-link i.fas.fa-arrow-left {
+      font-size: 24px !important;
+    }
+    
+    .back-link {
+      width: 50px !important;
+      height: 50px !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -58,16 +70,10 @@ if(isset($_POST['login'])) {
       <div class="alumni-title">ALUMNI</div>
     </div>
   </div>
-  <div class="menu" id="menuButton">
-    <img src="images/menu.png" alt="Menu">
+  <div class="header-right">
+    <a href="landing.php" class="back-link" title="Back to Landing Page"><i class="fas fa-arrow-left back-icon" style="font-size: 36px !important;"></i></a>
   </div>
 </header>
-
-<div id="modal" class="modal">
-  <a href="register.php">Register</a>
-  <a href="login.php">Log In</a>
-  <a href="landing.php">Back</a>
-</div>
 
 <div class="login-background">
   <section class="login-section">
@@ -136,10 +142,6 @@ if(isset($_POST['login'])) {
           <button type="submit" name="login" class="login-btn">
             <i class="fas fa-sign-in-alt"></i> Login
           </button>
-          
-          <div class="register-link">
-            Don't have an account? <a href="register.php">Register Now</a>
-          </div>
         </form>
       </div>
     </div>
