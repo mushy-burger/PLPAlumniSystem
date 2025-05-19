@@ -2,7 +2,7 @@
 session_start();
 include 'admin/db_connect.php';
 
-if (isset($_POST['submit'])) {
+if (isset($_POST['submit']) && (!isset($_POST['gallery_id']) || empty($_POST['gallery_id']))) {
     $title = $conn->real_escape_string($_POST['title']);
     $description = $conn->real_escape_string($_POST['description']);
     $upload_success = false;
@@ -47,7 +47,7 @@ if (isset($_POST['submit'])) {
     exit();
 }
 
-if(isset($_POST['update'])) {
+if(isset($_POST['update']) || (isset($_POST['submit']) && isset($_POST['gallery_id']) && !empty($_POST['gallery_id']))) {
     $id = intval($_POST['gallery_id']);
     $title = $conn->real_escape_string($_POST['title']);
     $description = $conn->real_escape_string($_POST['description']);
@@ -56,7 +56,7 @@ if(isset($_POST['update'])) {
     
     $sql = "UPDATE gallery SET title = '$title', description = '$description'";
     
-    if(isset($_FILES['gallery_image']) && $_FILES['gallery_image']['error'] == 0) {
+    if(isset($_FILES['gallery_image']) && $_FILES['gallery_image']['error'] == 0 && !empty($_FILES['gallery_image']['name'])) {
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
         $max_size = 5 * 1024 * 1024; 
         
@@ -194,7 +194,7 @@ $total_pages = ceil($total_items / $limit);
             <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
             <a href="admin-event.php"> <img src="images/calendar.png" alt="Events"><span>Events</span></a>
             <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-            <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+            <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
             <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
             <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
         </div>
@@ -203,6 +203,23 @@ $total_pages = ceil($total_items / $limit);
     <div class="content gallery-container">
         <div class="gallery-header">
             <h2>Manage Gallery Images</h2>
+            <div class="gallery-controls">
+                <div class="entries-control">
+                    Show
+                    <select id="entries-select" onchange="changeEntriesPerPage(this.value)">
+                        <option value="5" <?php echo $limit == 5 ? 'selected' : ''; ?>>5</option>
+                        <option value="10" <?php echo $limit == 10 ? 'selected' : ''; ?>>10</option>
+                        <option value="25" <?php echo $limit == 25 ? 'selected' : ''; ?>>25</option>
+                        <option value="50" <?php echo $limit == 50 ? 'selected' : ''; ?>>50</option>
+                    </select>
+                    Entries
+                </div>
+                <div class="search-control">
+                    <label for="gallery-search">Search:</label>
+                    <input type="text" id="gallery-search" placeholder="Enter search term..." value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <button class="add-new-btn" id="add-gallery-btn">Add New Gallery Image</button>
+            </div>
         </div>
         
         <?php if(isset($_SESSION['success_message'])): ?>
@@ -223,24 +240,6 @@ $total_pages = ceil($total_items / $limit);
             </div>
         <?php endif; ?>
         
-        <div class="gallery-controls">
-            <div class="entries-control">
-                Show
-                <select id="entries-select" onchange="changeEntriesPerPage(this.value)">
-                    <option value="5" <?php echo $limit == 5 ? 'selected' : ''; ?>>5</option>
-                    <option value="10" <?php echo $limit == 10 ? 'selected' : ''; ?>>10</option>
-                    <option value="25" <?php echo $limit == 25 ? 'selected' : ''; ?>>25</option>
-                    <option value="50" <?php echo $limit == 50 ? 'selected' : ''; ?>>50</option>
-                </select>
-                Entries
-            </div>
-            <div class="search-control">
-                <label for="gallery-search">Search:</label>
-                <input type="text" id="gallery-search" placeholder="Enter search term..." value="<?php echo htmlspecialchars($search); ?>">
-            </div>
-            <button class="add-new-btn" id="add-gallery-btn">Add New Gallery Image</button>
-        </div>
-
         <table class="gallery-table">
             <thead>
                 <tr>
@@ -308,6 +307,7 @@ $total_pages = ceil($total_items / $limit);
             </div>
             <form id="gallery-form" method="post" enctype="multipart/form-data" action="admin-gallery.php">
                 <input type="hidden" id="gallery-id" name="gallery_id">
+                <input type="hidden" id="edit-action" name="form_action" value="submit">
                 
                 <div class="form-group">
                     <label for="title">Title:</label>
@@ -319,17 +319,22 @@ $total_pages = ceil($total_items / $limit);
                     <textarea id="description" name="description" required></textarea>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" id="image-upload-group">
                     <label for="gallery_image">Image:</label>
                     <input type="file" id="gallery_image" name="gallery_image" accept="image/jpeg, image/png">
                     <div class="image-preview">
                         <img id="image-preview-element" src="#" alt="Preview">
                     </div>
+                    <div id="keep-existing-notice" style="display: none;" class="keep-existing">
+                        <input type="checkbox" id="keep-existing-check" checked disabled>
+                        <label for="keep-existing-check">Keep existing image if no new file is selected</label>
+                    </div>
                 </div>
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary" name="submit">Save</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn" name="submit">Add New Gallery Item</button>
+                    <button type="submit" class="btn btn-primary" id="update-btn" name="update" style="display: none;">Update Gallery Item</button>
                 </div>
             </form>
         </div>
@@ -371,6 +376,11 @@ $total_pages = ceil($total_items / $limit);
             document.getElementById('modal-title').textContent = 'Add New Gallery Image';
             document.getElementById('gallery-form').reset();
             document.getElementById('gallery-id').value = '';
+            document.getElementById('edit-action').value = 'submit';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('update-btn').style.display = 'none';
+            document.getElementById('keep-existing-notice').style.display = 'none';
+            document.getElementById('gallery_image').required = true;
             imagePreview.style.display = 'none';
             galleryModal.style.display = 'block';
         });
@@ -404,9 +414,15 @@ $total_pages = ceil($total_items / $limit);
         document.addEventListener('click', function(e) {
             if (e.target && e.target.classList.contains('edit-btn')) {
                 document.getElementById('modal-title').textContent = 'Edit Gallery Image';
+                document.getElementById('gallery-form').reset();
                 document.getElementById('gallery-id').value = e.target.dataset.id;
                 document.getElementById('title').value = e.target.dataset.title;
                 document.getElementById('description').value = e.target.dataset.description;
+                document.getElementById('edit-action').value = 'update';
+                document.getElementById('submit-btn').style.display = 'none';
+                document.getElementById('update-btn').style.display = 'inline-block';
+                document.getElementById('keep-existing-notice').style.display = 'block';
+                document.getElementById('gallery_image').required = false;
                 
                 if (e.target.dataset.image) {
                     imagePreview.src = e.target.dataset.image;
@@ -416,6 +432,20 @@ $total_pages = ceil($total_items / $limit);
                 }
                 
                 galleryModal.style.display = 'block';
+            }
+        });
+        
+        document.getElementById('gallery-form').addEventListener('submit', function(e) {
+            const isUpdate = document.getElementById('gallery-id').value !== '';
+            const submitBtn = document.getElementById('submit-btn');
+            const updateBtn = document.getElementById('update-btn');
+            
+            if (isUpdate) {
+                submitBtn.style.display = 'none';
+                updateBtn.style.display = 'inline-block';
+            } else {
+                submitBtn.style.display = 'inline-block';
+                updateBtn.style.display = 'none';
             }
         });
         

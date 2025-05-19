@@ -79,6 +79,7 @@ function build_query_params($exclude = []) {
     <title>Job Management - Alumni Portal</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/admin-job.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
 <body>
@@ -109,7 +110,7 @@ function build_query_params($exclude = []) {
             <a href="admin-job.php" class="active"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
             <a href="admin-event.php"> <img src="images/calendar.png" alt="Events"><span>Events</span>
             <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-            <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+            <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
             <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
             <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
         </div>
@@ -142,26 +143,28 @@ function build_query_params($exclude = []) {
                 <div class="left-controls">
                     <div class="entries-search-wrapper">
                         <form method="GET" action="admin-job.php" class="search-form">
-                            <div class="entries-control">
-                                <span>Show</span>
-                                <select name="limit" onchange="this.form.submit()">
-                                    <option value="10" <?php echo $items_per_page == 10 ? 'selected' : ''; ?>>10</option>
-                                    <option value="25" <?php echo $items_per_page == 25 ? 'selected' : ''; ?>>25</option>
-                                    <option value="50" <?php echo $items_per_page == 50 ? 'selected' : ''; ?>>50</option>
-                                </select>
-                                <span>Entries</span>
-                            </div>
-                            <div class="search-control">
-                                <span>Search:</span>
-                                <input type="text" name="search" class="search-input" value="<?php echo htmlspecialchars($search); ?>" placeholder="Company, Job Title...">
-                                <button type="submit" class="alist-filter">Filter</button>
+                            <div class="entries-search-controls">
+                                <div class="entries-control">
+                                    <span>Show</span>
+                                    <select name="limit" onchange="this.form.submit()">
+                                        <option value="10" <?php echo $items_per_page == 10 ? 'selected' : ''; ?>>10</option>
+                                        <option value="25" <?php echo $items_per_page == 25 ? 'selected' : ''; ?>>25</option>
+                                        <option value="50" <?php echo $items_per_page == 50 ? 'selected' : ''; ?>>50</option>
+                                    </select>
+                                    <span>Entries</span>
+                                </div>
+                                <div class="search-control">
+                                    <span>Search:</span>
+                                    <input type="text" name="search" class="search-input" value="<?php echo htmlspecialchars($search); ?>" placeholder="Company, Job Title...">
+                                    <button type="submit" class="alist-filter">Filter</button>
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
 
                 <div class="right-controls">
-                    <button class="new-button" id="openAddModal">+ New Job</button>
+                    <button class="new-button" id="openAddModal">New Job</button>
                 </div>
             </div>
 
@@ -212,14 +215,14 @@ function build_query_params($exclude = []) {
                                         data-title="<?php echo htmlspecialchars($row['job_title']); ?>"
                                         data-location="<?php echo htmlspecialchars($row['location']); ?>"
                                         data-description="<?php echo htmlspecialchars($row['description']); ?>"
-                                        onclick="viewJob(this)">View</button>
+                                        onclick="viewJob(this)"><i class="fas fa-eye"></i> View</button>
                                 <button class="edit-btn" data-id="<?php echo $row['id']; ?>"
                                         data-company="<?php echo htmlspecialchars($row['company']); ?>"
                                         data-title="<?php echo htmlspecialchars($row['job_title']); ?>"
                                         data-location="<?php echo htmlspecialchars($row['location']); ?>"
                                         data-description="<?php echo htmlspecialchars($row['description']); ?>"
-                                        onclick="editJob(this)">Edit</button>
-                                <button class="delete-btn" onclick="confirmDelete(<?php echo $row['id']; ?>)">Delete</button>
+                                        onclick="editJob(this)"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="delete-btn" onclick="confirmDelete(<?php echo $row['id']; ?>)"><i class="fas fa-trash-alt"></i> Delete</button>
                             </td>
                         </tr>
                         <?php 
@@ -227,7 +230,9 @@ function build_query_params($exclude = []) {
                         else:
                         ?>
                         <tr>
-                            <td colspan="7" style="text-align: center;">No job opportunities found</td>
+                            <td colspan="7" class="no-records">
+                                <i class="fas fa-info-circle"></i> No job opportunities found
+                            </td>
                         </tr>
                         <?php endif; ?>
                     </tbody>
@@ -236,17 +241,13 @@ function build_query_params($exclude = []) {
 
             <div class="list-foot">
                 <div class="pagination-info">
-                    <span>Page <?php echo $page; ?> of <?php echo max(1, $total_pages); ?></span>
-                    <span>Showing <?php echo min($total_records, $items_per_page); ?> of <?php echo $total_records; ?> entries</span>
                     <?php if (!empty($search)): ?>
                     <span class="filter-notice">Filtered results</span>
                     <?php endif; ?>
                 </div>
                 <div class="pagination">
-                    <?php if($page > 1): ?>
-                        <a href="?page=1&<?php echo build_query_params(['page']); ?>" class="page-link">First</a>
-                        <a href="?page=<?php echo $page-1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Previous</a>
-                    <?php endif; ?>
+                    <button <?php echo $page <= 1 ? 'disabled' : ''; ?> 
+                            onclick="changePage(<?php echo $page - 1; ?>)">Previous</button>
                     
                     <?php
                     $start_page = max(1, $page - 2);
@@ -254,14 +255,12 @@ function build_query_params($exclude = []) {
                     
                     for($i = $start_page; $i <= $end_page; $i++):
                     ?>
-                        <a href="?page=<?php echo $i; ?>&<?php echo build_query_params(['page']); ?>" 
-                           class="page-link <?php echo $i == $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                        <button <?php echo $i == $page ? 'class="active"' : ''; ?> 
+                                onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
                     <?php endfor; ?>
                     
-                    <?php if($page < $total_pages): ?>
-                        <a href="?page=<?php echo $page+1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Next</a>
-                        <a href="?page=<?php echo $total_pages; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Last</a>
-                    <?php endif; ?>
+                    <button <?php echo $page >= $total_pages ? 'disabled' : ''; ?> 
+                            onclick="changePage(<?php echo $page + 1; ?>)">Next</button>
                 </div>
             </div>
         </div>
@@ -293,7 +292,23 @@ function build_query_params($exclude = []) {
                 <input type="text" id="editTitle" name="job_title" class="edit-input" required>
 
                 <label for="editLocation">Location</label>
-                <input type="text" id="editLocation" name="location" class="edit-input" required>
+                <input type="text" id="editLocation" name="location" class="edit-input" placeholder="Enter city, address, etc." required>
+
+                <label for="editModality">Work Setup</label>
+                <div class="modality-options">
+                    <label class="modality-option">
+                        <input type="radio" name="modality" value="WFH" required>
+                        <span>WFH</span>
+                    </label>
+                    <label class="modality-option">
+                        <input type="radio" name="modality" value="Onsite" required>
+                        <span>Onsite</span>
+                    </label>
+                    <label class="modality-option">
+                        <input type="radio" name="modality" value="Hybrid" required>
+                        <span>Hybrid</span>
+                    </label>
+                </div>
 
                 <label for="editDescription">Description</label>
                 <textarea id="editDescription" name="description" class="edit-textarea" required></textarea>
@@ -319,7 +334,23 @@ function build_query_params($exclude = []) {
                 <input type="text" id="addTitle" name="job_title" class="edit-input" placeholder="Enter job title" required>
 
                 <label for="addLocation">Location</label>
-                <input type="text" id="addLocation" name="location" class="edit-input" placeholder="Enter location" required>
+                <input type="text" id="addLocation" name="location" class="edit-input" placeholder="Enter city, address, etc." required>
+
+                <label for="addModality">Work Setup</label>
+                <div class="modality-options">
+                    <label class="modality-option">
+                        <input type="radio" name="modality" value="WFH" required checked>
+                        <span>WFH</span>
+                    </label>
+                    <label class="modality-option">
+                        <input type="radio" name="modality" value="Onsite" required>
+                        <span>Onsite</span>
+                    </label>
+                    <label class="modality-option">
+                        <input type="radio" name="modality" value="Hybrid" required>
+                        <span>Hybrid</span>
+                    </label>
+                </div>
 
                 <label for="addDescription">Description</label>
                 <textarea id="addDescription" name="description" class="edit-textarea" placeholder="Enter job description" required></textarea>
@@ -385,9 +416,27 @@ function build_query_params($exclude = []) {
             document.getElementById('editJobId').value = id;
             document.getElementById('editCompany').value = company;
             document.getElementById('editTitle').value = title;
-            document.getElementById('editLocation').value = location;
+            
+            let locationText = location;
+            let modality = 'WFH';
+            
+            const modalityMatch = location.match(/\s*\((WFH|Onsite|Hybrid)\)$/);
+            if (modalityMatch) {
+                locationText = location.replace(modalityMatch[0], '').trim();
+                modality = modalityMatch[1];
+            }
+            
+            document.getElementById('editLocation').value = locationText;
+            
+            const modalityRadios = document.querySelectorAll('input[name="modality"]');
+            modalityRadios.forEach(radio => {
+                if (radio.value === modality) {
+                    radio.checked = true;
+                }
+            });
+            
             document.getElementById('editDescription').value = description;
-
+            
             editModal.style.display = "flex";
         }
 
@@ -401,6 +450,13 @@ function build_query_params($exclude = []) {
 
         openAddModalBtn.addEventListener("click", () => {
             addModal.style.display = "flex";
+            document.getElementById('addLocation').value = '';
+            const modalityRadios = document.querySelectorAll('input[name="modality"]');
+            modalityRadios.forEach(radio => {
+                if (radio.value === 'WFH') {
+                    radio.checked = true;
+                }
+            });
         });
 
         cancelAddBtn.addEventListener("click", () => {
@@ -426,6 +482,12 @@ function build_query_params($exclude = []) {
         cancelDeleteBtn.addEventListener("click", () => {
             deleteModal.style.display = "none";
         });
+        
+        function changePage(page) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('page', page);
+            window.location.href = currentUrl.toString();
+        }
 
         window.addEventListener("click", (e) => {
             if (e.target === modal) {

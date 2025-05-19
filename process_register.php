@@ -57,6 +57,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Passwords do not match";
     }
     
+    if (!empty($password)) {
+        $uppercase = preg_match('@[A-Z]@', $password);
+        $lowercase = preg_match('@[a-z]@', $password);
+        $number    = preg_match('@[0-9]@', $password);
+        $specialChars = preg_match('@[^\w]@', $password);
+        
+        if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
+            $errors[] = "Password must be at least 8 characters long and include: uppercase letter, lowercase letter, number, and special character.";
+        }
+    }
+    
     $user_check = "SELECT * FROM users WHERE alumni_id = ?";
     $stmt = $conn->prepare($user_check);
     $stmt->bind_param("s", $alumni_id);

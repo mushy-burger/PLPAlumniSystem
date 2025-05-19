@@ -194,3 +194,55 @@
         margin-top: 15px;
     }
 }
+
+.social-links {
+    margin-top: 10px;
+}
+
+.social-input {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.social-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    background-color: #4267B2;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.social-input:nth-child(1) .social-icon {
+    background-color: #4267B2; /* Facebook */
+}
+
+.social-input:nth-child(2) .social-icon {
+    background-color: #1DA1F2; /* Twitter */
+}
+
+.social-input:nth-child(3) .social-icon {
+    background-color: #E1306C; /* Instagram */
+}
+
+.social-input:nth-child(4) .social-icon {
+    background-color: #0077B5; /* LinkedIn */
+}
+
+.social-input input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.social-input input:focus {
+    border-color: #4a90e2;
+    outline: none;
+}

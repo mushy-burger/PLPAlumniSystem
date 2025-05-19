@@ -2,6 +2,19 @@
 session_start();
 include 'admin/db_connect.php';
 
+if(isset($_SESSION['alumni_id'])) {
+    $alumni_id = $_SESSION['alumni_id'];
+    $user_query = "SELECT CONCAT(firstname, ' ', lastname) as fullname FROM alumnus_bio WHERE id = ?";
+    $stmt = $conn->prepare($user_query);
+    $stmt->bind_param("i", $alumni_id);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+    $user_data = $user_result->fetch_assoc();
+    $fullname = $user_data ? $user_data['fullname'] : 'ALUMNI';
+} else {
+    $fullname = 'ALUMNI';
+}
+
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $items_per_page = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $offset = ($page - 1) * $items_per_page;
@@ -12,7 +25,7 @@ if (!empty($search)) {
     $search_condition = " WHERE title LIKE '%$search%' OR content LIKE '%$search%'";
 }
 
-$sql = "SELECT * FROM events $search_condition ORDER BY schedule DESC LIMIT $offset, $items_per_page";
+$sql = "SELECT * FROM events $search_condition ORDER BY schedule ASC LIMIT $offset, $items_per_page";
 $result = $conn->query($sql);
 
 $total_sql = "SELECT COUNT(*) as total FROM events $search_condition";
@@ -57,7 +70,7 @@ function build_query_params($exclude = []) {
               <a class="profile-pic">
                   <img src="images/avatar.png" alt="Profile Picture">
               </a>
-              <div class="profile-name">ALUMNI</div>
+              <div class="profile-name"><?php echo htmlspecialchars($fullname); ?></div>
           </div>
 
           <a href="alumni-home.php"><img src="images/home.png" alt="Home"><span>Home</span></a>
@@ -78,8 +91,8 @@ function build_query_params($exclude = []) {
           
           <div class="top-actions">
               <div class="left-controls">
-                  <div class="entries-search-wrapper">
-                      <form method="GET" action="alumni-events.php" class="search-form">
+                  <form method="GET" action="alumni-events.php" class="search-form">
+                      <div class="unified-controls">
                           <div class="entries-control">
                               <span>Show</span>
                               <select name="limit" onchange="this.form.submit()">
@@ -90,12 +103,11 @@ function build_query_params($exclude = []) {
                               <span>Entries</span>
                           </div>
                           <div class="search-control">
-                              <span>Search:</span>
                               <input type="text" name="search" class="search-input" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search events...">
-                              <button type="submit" class="search-btn">Search</button>
+                              <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
                           </div>
-                      </form>
-                  </div>
+                      </div>
+                  </form>
               </div>
           </div>
 

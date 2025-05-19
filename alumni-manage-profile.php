@@ -48,12 +48,24 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     $course_id = $_POST['course_id'];
     $connected_to = $_POST['connected_to'];
     $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
     
     $errors = [];
     if(empty($firstname)) $errors[] = "First name is required";
     if(empty($lastname)) $errors[] = "Last name is required";
     if(empty($email)) $errors[] = "Email is required";
     if(!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid email format";
+    
+    if(!empty($password)) {
+        $uppercase = preg_match('@[A-Z]@', $password);
+        $lowercase = preg_match('@[a-z]@', $password);
+        $number    = preg_match('@[0-9]@', $password);
+        $specialChars = preg_match('@[^\w]@', $password);
+        
+        if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
+            $errors[] = "Password must be at least 8 characters long and include: uppercase letter, lowercase letter, number, and special character.";
+        }
+    }
     
     if(empty($errors)) {
         $check_email = "SELECT alumni_id FROM alumnus_bio WHERE email = ? AND alumni_id != ?";
@@ -96,11 +108,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_user->bind_param("sss", $fullname, $email, $alumni_id);
                 $stmt_user->execute();
                 
-                if(!empty($_POST['password'])) {
-                    $password = md5($_POST['password']);
+                if(!empty($password)) {
+                    $hashed_password = md5($password);
                     $update_pass = "UPDATE users SET password = ? WHERE alumni_id = ?";
                     $stmt_pass = $conn->prepare($update_pass);
-                    $stmt_pass->bind_param("ss", $password, $alumni_id);
+                    $stmt_pass->bind_param("ss", $hashed_password, $alumni_id);
                     $stmt_pass->execute();
                 }
                 
@@ -296,7 +308,16 @@ if(!empty($alumnus['avatar']) && file_exists($alumnus['avatar'])) {
                                         <div class="form-group">
                                             <label for="password">New Password</label>
                                             <input type="password" name="password" id="password" placeholder="Leave blank to keep current password">
-                                            <span class="form-hint">At least 8 characters recommended</span>
+                                            <div class="password-requirements">
+                                                <p>Password must contain:</p>
+                                                <ul id="password-checklist">
+                                                    <li id="length"><i class="fas fa-times"></i>8+ characters</li>
+                                                    <li id="uppercase"><i class="fas fa-times"></i>Uppercase</li>
+                                                    <li id="lowercase"><i class="fas fa-times"></i>Lowercase</li>
+                                                    <li id="number"><i class="fas fa-times"></i>Number</li>
+                                                    <li id="special"><i class="fas fa-times"></i>Special char</li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -332,6 +353,42 @@ if(!empty($alumnus['avatar']) && file_exists($alumnus['avatar'])) {
                 </form>
             </div>
         </div>
+
+        <style>
+            .password-requirements {
+                margin-top: 8px;
+                font-size: 0.75rem;
+                color: #666;
+            }
+            .password-requirements p {
+                margin-bottom: 3px;
+                font-size: 0.75rem;
+                color: #555;
+            }
+            #password-checklist {
+                list-style: none;
+                padding-left: 0;
+                margin: 0;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            #password-checklist li {
+                margin: 0;
+                color: #dc3545;
+                font-size: 0.75rem;
+                display: flex;
+                align-items: center;
+            }
+            #password-checklist li.valid {
+                color: #28a745;
+            }
+            #password-checklist li i {
+                margin-right: 3px;
+                width: 12px;
+                font-size: 0.75rem;
+            }
+        </style>
 
         <script>
             function toggleSidebar() {
@@ -375,6 +432,38 @@ if(!empty($alumnus['avatar']) && file_exists($alumnus['avatar'])) {
                     imagePreview.style.display = 'none';
                 }
             });
+
+            // Password requirements checker
+            const passwordField = document.getElementById('password');
+            if (passwordField) {
+                passwordField.addEventListener('input', function() {
+                    const password = this.value;
+                    
+                    // Check requirements
+                    const requirements = {
+                        length: password.length >= 8,
+                        uppercase: /[A-Z]/.test(password),
+                        lowercase: /[a-z]/.test(password),
+                        number: /[0-9]/.test(password),
+                        special: /[^A-Za-z0-9]/.test(password)
+                    };
+                    
+                    // Update checklist UI
+                    Object.keys(requirements).forEach(req => {
+                        const li = document.getElementById(req);
+                        if (li) {
+                            const icon = li.querySelector('i');
+                            if (requirements[req]) {
+                                li.classList.add('valid');
+                                icon.className = 'fas fa-check';
+                            } else {
+                                li.classList.remove('valid');
+                                icon.className = 'fas fa-times';
+                            }
+                        }
+                    });
+                });
+            }
         </script>
     </body>
 </html>

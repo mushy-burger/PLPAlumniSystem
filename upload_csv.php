@@ -274,7 +274,7 @@ if(isset($_POST['upload'])) {
                         }
                         
                         $sql = "INSERT INTO alumnus_bio (alumni_id, firstname, middlename, lastname, gender, batch, course_id, email, connected_to, avatar, status) 
-                                VALUES ('$alumni_id', '$firstname', '$middlename', '$lastname', '$gender', '$batch', '$course_id', '$email', 0, 'avatar.png', 1)";
+                                VALUES ('$alumni_id', '$firstname', '$middlename', '$lastname', '$gender', '$batch', '$course_id', '$email', 0, 'avatar.png', 0)";
                         
                         if($conn->query($sql) !== TRUE) {
                             throw new Exception("Row $processedRows: Error creating alumni record for $firstname $lastname: " . $conn->error);
@@ -295,8 +295,8 @@ if(isset($_POST['upload'])) {
                         $hashed_password = md5($random_password);
                         
                         $name = $firstname . ' ' . $lastname;
-                        $sql_user = "INSERT INTO users (alumni_id, name, username, password, type, auto_generated_pass) 
-                                    VALUES ('$alumni_id', '$name', '$email', '$hashed_password', 3, '$random_password')";
+                        $sql_user = "INSERT INTO users (alumni_id, name, username, password, type, auto_generated_pass, is_default_password) 
+                                    VALUES ('$alumni_id', '$name', '$email', '$hashed_password', 3, '$random_password', 1)";
                         
                         if(!$conn->query($sql_user)) {
                             throw new Exception("Error creating user account: " . $conn->error);
@@ -330,7 +330,7 @@ if(isset($_POST['upload'])) {
                     }
                     
                     $sql = "INSERT INTO alumnus_bio (alumni_id, firstname, middlename, lastname, gender, batch, course_id, email, connected_to, avatar, status) 
-                            VALUES ('$alumni_id', '$firstname', '$middlename', '$lastname', '$gender', '$batch', '$course_id', '$email', 0, 'avatar.png', 1)";
+                            VALUES ('$alumni_id', '$firstname', '$middlename', '$lastname', '$gender', '$batch', '$course_id', '$email', 0, 'avatar.png', 0)";
                     
                     if($conn->query($sql) === TRUE) {
                         $count++;
@@ -339,8 +339,8 @@ if(isset($_POST['upload'])) {
                         $hashed_password = md5($random_password);
                         
                         $name = $firstname . ' ' . $lastname;
-                        $sql_user = "INSERT INTO users (alumni_id, name, username, password, type, auto_generated_pass) 
-                                    VALUES ('$alumni_id', '$name', '$email', '$hashed_password', 3, '$random_password')";
+                        $sql_user = "INSERT INTO users (alumni_id, name, username, password, type, auto_generated_pass, is_default_password) 
+                                    VALUES ('$alumni_id', '$name', '$email', '$hashed_password', 3, '$random_password', 1)";
                         
                         if(!$conn->query($sql_user)) {
                             $errors++;

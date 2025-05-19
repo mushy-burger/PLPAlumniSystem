@@ -1,41 +1,27 @@
 <?php
-// Include database connection
 include 'admin/db_connect.php';
 
-// Get system settings
 $system_query = "SELECT * FROM system_settings WHERE id = 1";
 $system_result = $conn->query($system_query);
 $system = $system_result->fetch_assoc();
 
-// Get total statistics
-$alumni_count_query = "SELECT COUNT(*) as count FROM alumnus_bio";
-$alumni_count_result = $conn->query($alumni_count_query);
-$alumni_count = $alumni_count_result->fetch_assoc()['count'];
-
-$courses_count_query = "SELECT COUNT(*) as count FROM courses";
-$courses_count_result = $conn->query($courses_count_query);
-$courses_count = $courses_count_result->fetch_assoc()['count'];
-
-$events_count_query = "SELECT COUNT(*) as count FROM events";
-$events_count_result = $conn->query($events_count_query);
-$events_count = $events_count_result->fetch_assoc()['count'];
-
-// Get latest events (limit to 3)
-$events_query = "SELECT * FROM events WHERE schedule >= NOW() ORDER BY schedule ASC LIMIT 3";
+$events_query = "SELECT * FROM events ORDER BY id DESC LIMIT 4";
 $events_result = $conn->query($events_query);
 
-// If no upcoming events, get recent past events
-if ($events_result->num_rows == 0) {
-    $events_query = "SELECT * FROM events ORDER BY schedule DESC LIMIT 3";
-    $events_result = $conn->query($events_query);
-}
-
-// Get random gallery images (limit to 4)
-$gallery_query = "SELECT * FROM gallery ORDER BY RAND() LIMIT 4";
+$gallery_query = "SELECT * FROM gallery ORDER BY RAND() LIMIT 6";
 $gallery_result = $conn->query($gallery_query);
 
-// Get alumni officers
-$officers_query = "SELECT * FROM alumni_officers ORDER BY display_order, position LIMIT 4";
+$current_year = date('Y');
+$selected_year = isset($_GET['year']) ? $_GET['year'] : $current_year;
+
+$years_query = "SELECT DISTINCT class_year FROM alumni_officers ORDER BY class_year DESC";
+$years_result = $conn->query($years_query);
+$available_years = [];
+while($row = $years_result->fetch_assoc()) {
+    $available_years[] = $row['class_year'];
+}
+
+$officers_query = "SELECT * FROM alumni_officers WHERE class_year = '$selected_year' ORDER BY display_order, position LIMIT 4";
 $officers_result = $conn->query($officers_query);
 ?>
 <!DOCTYPE html>
@@ -46,8 +32,8 @@ $officers_result = $conn->query($officers_query);
   <title><?php echo isset($system['name']) ? $system['name'] : 'PLP Alumni Portal'; ?></title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://unpkg.com/scrollreveal@4.0.9/dist/scrollreveal.min.js"></script>
   <style>
-    /* Header override to match style.css */
     .header-left {
       display: flex;
       align-items: center;
@@ -94,11 +80,10 @@ $officers_result = $conn->query($officers_query);
       display: none !important;
     }
     
-    /* Additional styles for landing page */
     .hero-section {
       position: relative;
       height: 600px;
-      background: url('images/plpasigg.jpg') center/cover no-repeat;
+      background: url('<?php echo !empty($system['cover_img']) ? $system['cover_img'] : 'images/plpasigg.jpg'; ?>') center/cover no-repeat;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -164,115 +149,6 @@ $officers_result = $conn->query($officers_query);
       transform: scale(1.05);
     }
     
-    .stats-section {
-      background-color: #0047AB;
-      padding: 40px 0;
-      position: relative;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-    
-    .stats-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(0, 47, 108, 0.9) 0%, rgba(0, 71, 171, 0.9) 100%);
-      z-index: 1;
-    }
-    
-    .stats-container {
-      display: flex;
-      justify-content: space-around;
-      max-width: 1200px;
-      margin: 0 auto;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 2;
-    }
-    
-    .stat-item {
-      text-align: center;
-      padding: 20px;
-      flex: 1;
-      min-width: 200px;
-      position: relative;
-      transition: transform 0.3s ease;
-    }
-    
-    .stat-item:hover {
-      transform: translateY(-5px);
-    }
-    
-    .stat-item::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 60%;
-      width: 1px;
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    .stat-item:last-child::after {
-      display: none;
-    }
-    
-    .stat-icon-bg {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 auto 15px;
-      width: 60px;
-      height: 60px;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-    }
-    
-    .stat-icon-bg i {
-      font-size: 24px;
-      color: white;
-    }
-    
-    .stat-number {
-      font-size: 42px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: block;
-      color: white;
-      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      font-family: 'Arial', sans-serif;
-    }
-    
-    .stat-label {
-      font-size: 16px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.9);
-      position: relative;
-      padding-bottom: 10px;
-    }
-    
-    .stat-label::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 30px;
-      height: 2px;
-      background-color: rgba(255, 255, 255, 0.4);
-    }
-    
-    .features-section {
-      padding: 100px 20px;
-      background-color: #f8f9fa;
-    }
-    
     .section-title {
       text-align: center;
       color: #003366;
@@ -293,109 +169,36 @@ $officers_result = $conn->query($officers_query);
       transform: translateX(-50%);
     }
     
-    .features-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    .feature-card {
-      background-color: white;
-      border-radius: 10px;
-      padding: 40px 30px;
-      width: 300px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .feature-card:hover {
-      transform: translateY(-15px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    }
-    
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background-color: #0047AB;
-    }
-    
-    .feature-icon {
-      width: 80px;
-      height: 80px;
-      background-color: #e6f0fa;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 auto 25px;
-      transition: all 0.3s ease;
-    }
-    
-    .feature-card:hover .feature-icon {
-      background-color: #0047AB;
-      color: white;
-    }
-    
-    .feature-icon i {
-      font-size: 36px;
-      color: #0047AB;
-      transition: all 0.3s ease;
-    }
-    
-    .feature-card:hover .feature-icon i {
-      color: white;
-    }
-    
-    .feature-card h3 {
-      color: #003366;
-      font-size: 22px;
-      margin-bottom: 15px;
-    }
-    
-    .feature-card p {
-      color: #555;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    
     .events-section {
       padding: 100px 20px;
       background-color: white;
     }
     
     .events-container {
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-      max-width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+      max-width: 1200px;
       margin: 0 auto;
     }
     
     .event-card {
       display: flex;
+      flex-direction: column;
       background-color: #f9f9f9;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
     .event-card:hover {
       transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
     }
     
     .event-image {
-      width: 350px;
+      width: 100%;
       height: 250px;
       object-fit: cover;
     }
@@ -459,7 +262,7 @@ $officers_result = $conn->query($officers_query);
     
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
       max-width: 1200px;
       margin: 0 auto;
@@ -467,10 +270,11 @@ $officers_result = $conn->query($officers_query);
     
     .gallery-item {
       position: relative;
-      height: 300px;
+      height: 250px;
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
     .gallery-item img {
@@ -481,7 +285,8 @@ $officers_result = $conn->query($officers_query);
     }
     
     .gallery-item:hover img {
-      transform: scale(1.1);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
     }
     
     .gallery-title {
@@ -541,28 +346,27 @@ $officers_result = $conn->query($officers_query);
     .about-image {
       flex: 1;
       position: relative;
+      padding: 20px;
     }
     
     .about-image-main {
-      width: 450px;
-      height: 350px;
-      border-radius: 10px;
+      width: 100%;
+      height: 400px;
+      border-radius: 15px;
       object-fit: cover;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
       position: relative;
       z-index: 2;
     }
     
+    .about-image:hover .about-image-main {
+      transform: translateY(-10px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+    
     .about-image::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-color: #0047AB;
-      top: 20px;
-      left: 20px;
-      border-radius: 10px;
-      z-index: 1;
+      display: none;
     }
     
     .about-content {
@@ -573,6 +377,7 @@ $officers_result = $conn->query($officers_query);
       color: #003366;
       font-size: 36px;
       margin-bottom: 25px;
+      text-align: center;
     }
     
     .about-content p {
@@ -651,7 +456,7 @@ $officers_result = $conn->query($officers_query);
     
     .footer {
       position: relative;
-      background: url('images/plpasigg.jpg') center/cover no-repeat;
+      background: url('<?php echo !empty($system['cover_img']) ? $system['cover_img'] : 'images/plpasigg.jpg'; ?>') center/cover no-repeat;
       padding: 30px 20px 20px;
       color: white;
     }
@@ -728,8 +533,7 @@ $officers_result = $conn->query($officers_query);
       font-size: 12px;
       color: rgba(255, 255, 255, 0.6);
     }
-    
-    /* Social Media Icons */
+  
     .social-icons {
       display: flex;
       gap: 10px;
@@ -790,7 +594,6 @@ $officers_result = $conn->query($officers_query);
       transform: scale(1);
     }
     
-    /* Animations */
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -802,7 +605,6 @@ $officers_result = $conn->query($officers_query);
       }
     }
     
-    /* Icon placeholders */
     .icon-placeholder {
       display: flex;
       justify-content: center;
@@ -813,7 +615,6 @@ $officers_result = $conn->query($officers_query);
       color: #0047AB;
     }
     
-    /* Responsive adjustments */
     @media (max-width: 992px) {
       .hero-content h1 {
         font-size: 42px;
@@ -830,6 +631,11 @@ $officers_result = $conn->query($officers_query);
       .about-image-main {
         width: 100%;
         max-width: 450px;
+        height: 350px;
+      }
+      
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
     
@@ -849,6 +655,10 @@ $officers_result = $conn->query($officers_query);
       
       .cta-button {
         padding: 15px 35px;
+      }
+      
+      .events-container {
+        grid-template-columns: 1fr;
       }
       
       .event-card {
@@ -916,6 +726,10 @@ $officers_result = $conn->query($officers_query);
       
       .stat-item:last-child {
         margin-bottom: 0;
+      }
+      
+      .gallery-grid {
+        grid-template-columns: 1fr;
       }
     }
     
@@ -1000,7 +814,6 @@ $officers_result = $conn->query($officers_query);
       line-height: 1.6;
     }
     
-    /* Alumni Officers Section Specific Styles */
     .officers-section {
       padding: 100px 20px;
       background-color: #f0f5ff;
@@ -1020,13 +833,13 @@ $officers_result = $conn->query($officers_query);
       border-radius: 10px;
       overflow: hidden;
       width: 250px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
     .officer-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
     }
     
     .officer-image {
@@ -1154,7 +967,6 @@ $officers_result = $conn->query($officers_query);
       display: none !important;
     }
     
-    /* Hamburger menu */
     .menu {
       cursor: pointer;
     }
@@ -1164,7 +976,6 @@ $officers_result = $conn->query($officers_query);
       height: auto;
     }
     
-    /* Modal */
     .modal {
       display: none;
       position: fixed; 
@@ -1208,6 +1019,40 @@ $officers_result = $conn->query($officers_query);
     .show {
       display: flex;
     }
+    
+    .year-selector-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .year-dropdown {
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 2px solid #0047AB;
+      background-color: white;
+      color: #0047AB;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: auto;
+      min-width: 150px;
+      text-align: center;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%230047AB" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+    
+    .year-dropdown:hover, .year-dropdown:focus {
+      background-color: #f0f5ff;
+      border-color: #003366;
+      outline: none;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -1233,61 +1078,8 @@ $officers_result = $conn->query($officers_query);
   </div>
 </section>
 
-<section class="stats-section">
-  <div class="stats-container">
-    <div class="stat-item">
-      <div class="stat-icon-bg">
-        <i class="fas fa-user-graduate"></i>
-      </div>
-      <span class="stat-number"><?php echo number_format($alumni_count); ?></span>
-      <span class="stat-label">Alumni</span>
-    </div>
-    <div class="stat-item">
-      <div class="stat-icon-bg">
-        <i class="fas fa-book"></i>
-      </div>
-      <span class="stat-number"><?php echo number_format($courses_count); ?></span>
-      <span class="stat-label">Courses</span>
-    </div>
-    <div class="stat-item">
-      <div class="stat-icon-bg">
-        <i class="fas fa-calendar-check"></i>
-      </div>
-      <span class="stat-number"><?php echo number_format($events_count); ?></span>
-      <span class="stat-label">Events</span>
-    </div>
-  </div>
-</section>
-
-<section class="features-section">
-  <h2 class="section-title">Why Join Our Community</h2>
-  <div class="features-container">
-    <div class="feature-card">
-      <div class="feature-icon">
-        <i class="fas fa-network-wired"></i>
-      </div>
-      <h3>Network</h3>
-      <p>Connect with thousands of alumni across different industries to expand your professional network and build meaningful relationships.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <i class="fas fa-briefcase"></i>
-      </div>
-      <h3>Job Opportunities</h3>
-      <p>Access exclusive job postings and career opportunities shared by fellow alumni and partner companies in various industries.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <i class="fas fa-calendar-alt"></i>
-      </div>
-      <h3>Events</h3>
-      <p>Stay updated with university events, reunions, and activities specially organized for alumni to keep your connection strong.</p>
-    </div>
-  </div>
-</section>
-
 <section class="events-section">
-  <h2 class="section-title"><?php echo $events_result->num_rows > 0 ? 'Upcoming Events' : 'Recent Events'; ?></h2>
+  <h2 class="section-title">Latest Events</h2>
   <div class="events-container">
     <?php if($events_result->num_rows > 0): ?>
       <?php while($event = $events_result->fetch_assoc()): 
@@ -1346,10 +1138,10 @@ $officers_result = $conn->query($officers_query);
 <section class="about-section">
   <div class="about-container">
     <div class="about-image">
-      <img src="images/plpasigg.jpg" alt="PLP Campus" class="about-image-main">
+      <img src="<?php echo !empty($system['cover_img']) ? $system['cover_img'] : 'images/plpasigg.jpg'; ?>" alt="PLP Campus" class="about-image-main">
     </div>
     <div class="about-content">
-      <h2>About Our Alumni Portal</h2>
+      <h2>About</h2>
       <?php if(isset($system['about_content']) && !empty($system['about_content'])): ?>
         <div class="about-text"><?php echo html_entity_decode($system['about_content']); ?></div>
       <?php else: ?>
@@ -1362,6 +1154,23 @@ $officers_result = $conn->query($officers_query);
 
 <section class="officers-section">
   <h2 class="section-title">Alumni Officers</h2>
+  
+  <div class="year-selector-container">
+    <form action="" method="get" id="yearSelectorForm">
+      <select name="year" id="yearSelector" class="year-dropdown">
+        <?php if(!empty($available_years)): ?>
+          <?php foreach($available_years as $year): ?>
+            <option value="<?php echo $year; ?>" <?php echo $year == $selected_year ? 'selected' : ''; ?>>
+              Class of <?php echo $year; ?>
+            </option>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <option value="<?php echo $current_year; ?>"><?php echo $current_year; ?></option>
+        <?php endif; ?>
+      </select>
+    </form>
+  </div>
+  
   <div class="officers-container">
     <?php if($officers_result && $officers_result->num_rows > 0): ?>
       <?php while($officer = $officers_result->fetch_assoc()): ?>
@@ -1380,7 +1189,7 @@ $officers_result = $conn->query($officers_query);
       <div class="no-gallery-items">
         <div class="no-content-message">
           <i class="fas fa-users"></i>
-          <p>No alumni officers available yet. Check back soon for updates!</p>
+          <p>No alumni officers available for the selected year. Check other years or check back later!</p>
         </div>
       </div>
     <?php endif; ?>
@@ -1397,11 +1206,21 @@ $officers_result = $conn->query($officers_query);
     <div class="footer-column">
       <h3>CONNECT WITH US</h3>
       <div class="social-icons">
-        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+        <?php if (!empty($system['facebook'])): ?>
+          <a href="<?php echo htmlspecialchars($system['facebook']); ?>" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+        <?php endif; ?>
+        <?php if (!empty($system['twitter'])): ?>
+          <a href="<?php echo htmlspecialchars($system['twitter']); ?>" target="_blank" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <?php endif; ?>
+        <?php if (!empty($system['instagram'])): ?>
+          <a href="<?php echo htmlspecialchars($system['instagram']); ?>" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <?php endif; ?>
+        <?php if (!empty($system['linkedin'])): ?>
+          <a href="<?php echo htmlspecialchars($system['linkedin']); ?>" target="_blank" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        <?php endif; ?>
+        <?php if (!empty($system['youtube'])): ?>
+        <a href="<?php echo htmlspecialchars($system['youtube']); ?>" target="_blank" class="social-icon"><i class="fab fa-youtube"></i></a>
+        <?php endif; ?>
       </div>
     </div>
   </div>
@@ -1426,31 +1245,19 @@ $officers_result = $conn->query($officers_query);
 </div>
 
 <script>
-  // Menu Toggle
-  const menuButton = document.getElementById('menuButton');
-  const modal = document.getElementById('modal');
-
-  menuButton.onclick = function() {
-    modal.classList.toggle('show');
-  }
-
-  window.onclick = function(event) {
-    if (!event.target.closest('.menu') && !event.target.closest('#modal')) {
-      modal.classList.remove('show');
-    }
-  }
-  
-  // Event Modal
   const eventLinks = document.querySelectorAll('.event-link');
   const eventModal = document.getElementById('eventModal');
   const closeEventModal = document.getElementById('closeEventModal');
+  
+  document.getElementById('yearSelector').addEventListener('change', function() {
+    document.getElementById('yearSelectorForm').submit();
+  });
   
   eventLinks.forEach(link => {
     link.addEventListener('click', function(e) {
       e.preventDefault();
       const eventId = this.getAttribute('data-id');
       
-      // Fetch event details
       fetch('get_event_details.php?id=' + eventId)
         .then(response => response.json())
         .then(data => {
@@ -1482,6 +1289,62 @@ $officers_result = $conn->query($officers_query);
     if (event.target === eventModal) {
       eventModal.style.display = 'none';
     }
+  });
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    ScrollReveal().reveal('.hero-content', {
+      delay: 200,
+      distance: '50px',
+      origin: 'bottom',
+      duration: 1000
+    });
+    
+    ScrollReveal().reveal('.event-card', {
+      delay: 200,
+      distance: '50px',
+      origin: 'bottom',
+      duration: 800,
+      interval: 200
+    });
+    
+    ScrollReveal().reveal('.gallery-item', {
+      delay: 200,
+      distance: '50px',
+      origin: 'left',
+      duration: 800,
+      interval: 150
+    });
+    
+    ScrollReveal().reveal('.about-image', {
+      delay: 200,
+      distance: '100px',
+      origin: 'left',
+      duration: 1000,
+      easing: 'cubic-bezier(0.5, 0, 0, 1)',
+      scale: 0.9
+    });
+    
+    ScrollReveal().reveal('.about-content', {
+      delay: 400,
+      distance: '100px',
+      origin: 'right',
+      duration: 1000
+    });
+    
+    ScrollReveal().reveal('.officer-card', {
+      delay: 200,
+      distance: '30px',
+      origin: 'bottom',
+      duration: 800,
+      interval: 150
+    });
+    
+    ScrollReveal().reveal('.section-title', {
+      delay: 100,
+      distance: '20px',
+      origin: 'top',
+      duration: 800
+    });
   });
 </script>
 

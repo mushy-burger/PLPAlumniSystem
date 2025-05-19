@@ -8,7 +8,7 @@
     --warning-color: #ff9800;
     --warning-dark: #e68a00;
     --light-bg: #f9f9f9;
-    --border-color: #ddd;
+    --border-color: #ebecf1;
     --text-primary: #333;
     --text-secondary: #666;
     --verified-color: #2e7d32;
@@ -40,6 +40,12 @@
 .filter-container {
     margin: 25px 0;
     display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.filter-header {
+    display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
@@ -60,6 +66,8 @@
     align-items: center;
     gap: 8px;
     text-decoration: none;
+    min-width: 150px;
+    justify-content: center;
 }
 
 .toggle-filters-btn::before {
@@ -89,20 +97,29 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 20px;
-    margin-bottom: 25px;
+    margin-top: 15px;
     display: none;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    width: 100%;
 }
 
 .filter-panel.active {
     display: block;
-    animation: fadeIn 0.3s ease;
+    animation: slideDown 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes slideDown {
+    from { 
+        opacity: 0; 
+        transform: translateY(-20px);
+        max-height: 0;
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+        max-height: 1000px;
+    }
 }
 
 .filter-row {
@@ -273,11 +290,11 @@
 }
 
 .stat-box.filtered {
-    border-top-color: var(--warning-color);
+    border-color: #ffc107;
 }
 
 .stat-box.filtered .stat-number {
-    color: var(--warning-color);
+    color: #ffc107;
 }
 
 .table-alist {
@@ -433,18 +450,8 @@
     justify-content: center;
     gap: 5px;
     white-space: nowrap;
-}
-
-.btn-view, .btn-edit, .btn-delete {
-    padding: 4px 8px;
-    font-size: 12px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-    min-width: 50px;
+    width: 100%;
+    padding: 0;
 }
 
 .btn-view, .btn-edit, .btn-delete {
@@ -461,6 +468,17 @@
     align-items: center;
     gap: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    justify-content: center;
+}
+
+.table-alist td.action-buttons {
+    padding: 10px;
+    background-color: transparent;
+}
+
+.table-alist tr:hover td.action-buttons {
+    background-color: transparent;
 }
 
 .btn-view {
@@ -524,7 +542,7 @@
 
 .list-foot {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-top: 25px;
     flex-wrap: wrap;
@@ -534,6 +552,8 @@
 .pagination-info {
     color: var(--text-secondary);
     font-size: 14px;
+    text-align: center;
+    width: 100%;
 }
 
 .pagination-info span {
@@ -561,39 +581,37 @@
 
 .pagination {
     display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.page-link {
-    display: inline-flex;
-    align-items: center;
     justify-content: center;
-    min-width: 35px;
-    height: 35px;
-    padding: 0 10px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.pagination button {
+    padding: 8px 15px;
+    border: 1px solid #dee2e6;
     background-color: white;
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: 6px;
+    color: #007bff;
+    cursor: pointer;
+    border-radius: 4px;
     transition: all 0.3s;
-    font-weight: 600;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.page-link:hover {
-    background-color: #f5f5f5;
-    border-color: #ccc;
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+.pagination button:hover:not(:disabled) {
+    background-color: #e9ecef;
+    color: #0056b3;
 }
 
-.page-link.active {
-    background-color: var(--primary-color);
+.pagination button.active {
+    background-color: #007bff;
     color: white;
-    border-color: var(--primary-color);
-    box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+    border-color: #007bff;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 @media screen and (max-width: 768px) {

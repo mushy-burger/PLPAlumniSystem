@@ -131,42 +131,53 @@ function build_query_params($exclude = []) {
                 <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
                 <a href="admin-event.php"><img src="images/calendar.png" alt="Events"><span>Events</span></a>
                 <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-                <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+                <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
                 <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
                 <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
             </div>
         </div>
 
         <div class="al-main-content">
-            <header>List of Courses</header> <hr>
+            <div class="top-section">
+                <div class="header-and-search">
+                    <header>List of Courses</header>
+                    <div class="alist-search">
+                        <form method="GET" action="admin-course-list.php">
+                            <div class="search-input-container">
+                                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" id="search" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search courses...">
+                            </div>
+                            <div class="button-group">
+                                <button type="submit" class="alist-filter">Search</button>
+                                <div class="button-separator"></div>
+                                <button type="button" class="add-course-btn" onclick="openAddCourseModal()">Add New Course</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="course-stats">
+                    <div class="stat-box">
+                        <span class="stat-number"><?php echo $total_records; ?></span>
+                        <span class="stat-label">Total Courses</span>
+                    </div>
+                    <?php if (!empty($search)): ?>
+                    <div class="stat-box filtered">
+                        <span class="stat-number">1</span>
+                        <span class="stat-label">Active Filter</span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <?php if (!empty($message)): ?>
             <div class="alert alert-<?php echo $message_type; ?>">
                 <?php echo $message; ?>
             </div>
             <?php endif; ?>
-
-            <div class="alist-search">
-                <form method="GET" action="admin-course-list.php">
-                    <label class="alist-label">Search: </label>
-                    <input type="text" id="search" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Course Name or Description">
-                    <button type="submit" class="alist-filter">Search</button>
-                    <button type="button" class="add-course-btn" onclick="openAddCourseModal()">Add New Course</button>
-                </form>
-            </div>
-
-            <div class="course-stats">
-                <div class="stat-box">
-                    <span class="stat-number"><?php echo $total_records; ?></span>
-                    <span class="stat-label">Total Courses</span>
-                </div>
-                <?php if (!empty($search)): ?>
-                <div class="stat-box filtered">
-                    <span class="stat-number">1</span>
-                    <span class="stat-label">Active Filter</span>
-                </div>
-                <?php endif; ?>
-            </div>
 
             <div class="table-alist">
                 <table id="courseTable">
@@ -219,36 +230,18 @@ function build_query_params($exclude = []) {
                         <?php endif; ?>
                     </tbody>
                 </table>
-            </div>
 
-            <div class="list-foot">
-                <div class="pagination-info">
-                    <span>Page <?php echo $page; ?> of <?php echo max(1, $total_pages); ?></span>
-                    <span>Showing <?php echo min($total_records, $items_per_page); ?> of <?php echo $total_records; ?> entries</span>
-                    <?php if (!empty($search)): ?>
-                    <span class="filter-notice">Filtered results</span>
-                    <?php endif; ?>
-                </div>
                 <div class="pagination">
-                    <?php if($page > 1): ?>
-                        <a href="?page=1&<?php echo build_query_params(['page']); ?>" class="page-link">First</a>
-                        <a href="?page=<?php echo $page-1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Previous</a>
-                    <?php endif; ?>
+                    <button <?php echo $page <= 1 ? 'disabled' : ''; ?> 
+                            onclick="changePage(<?php echo $page - 1; ?>)">Previous</button>
                     
-                    <?php
-                    $start_page = max(1, $page - 2);
-                    $end_page = min($total_pages, $page + 2);
-                    
-                    for($i = $start_page; $i <= $end_page; $i++):
-                    ?>
-                        <a href="?page=<?php echo $i; ?>&<?php echo build_query_params(['page']); ?>" 
-                           class="page-link <?php echo $i == $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <button <?php echo $i == $page ? 'class="active"' : ''; ?> 
+                                onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
                     <?php endfor; ?>
                     
-                    <?php if($page < $total_pages): ?>
-                        <a href="?page=<?php echo $page+1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Next</a>
-                        <a href="?page=<?php echo $total_pages; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Last</a>
-                    <?php endif; ?>
+                    <button <?php echo $page >= $total_pages ? 'disabled' : ''; ?> 
+                            onclick="changePage(<?php echo $page + 1; ?>)">Next</button>
                 </div>
             </div>
         </div>
@@ -306,6 +299,24 @@ function build_query_params($exclude = []) {
             toggleBtn.innerHTML = sidebar.classList.contains('collapsed') ? '&#x25B6;' : '&#x25C0;';
         }
 
+        function openAddCourseModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Course';
+            
+            <?php if ($has_course_code): ?>
+            document.getElementById('courseCode').value = '';
+            <?php endif; ?>
+            
+            document.getElementById('courseName').value = '';
+            
+            <?php if ($has_department): ?>
+            document.getElementById('department').value = '';
+            <?php endif; ?>
+            
+            document.getElementById('courseId').value = '';
+            document.getElementById('action').value = 'add';
+            document.getElementById('courseEditModal').style.display = 'flex';
+        }
+
         function editCourse(id, code, name, dept) {
             document.getElementById('modalTitle').textContent = 'Edit Course';
             document.getElementById('courseId').value = id;
@@ -324,24 +335,6 @@ function build_query_params($exclude = []) {
             document.getElementById('courseEditModal').style.display = 'flex';
         }
 
-        function openAddCourseModal() {
-            document.getElementById('modalTitle').textContent = 'Add New Course';
-            document.getElementById('courseId').value = '';
-            
-            <?php if ($has_course_code): ?>
-            document.getElementById('courseCode').value = '';
-            <?php endif; ?>
-            
-            document.getElementById('courseName').value = '';
-            
-            <?php if ($has_department): ?>
-            document.getElementById('department').value = '';
-            <?php endif; ?>
-            
-            document.getElementById('action').value = 'add';
-            document.getElementById('courseEditModal').style.display = 'flex';
-        }
-
         function closeCourseModal() {
             document.getElementById('courseEditModal').style.display = 'none';
         }
@@ -355,6 +348,11 @@ function build_query_params($exclude = []) {
 
         function closeDeleteModal() {
             document.getElementById('deleteConfirmModal').style.display = 'none';
+        }
+
+        function changePage(page) {
+            const queryParams = build_query_params(['page']);
+            window.location.href = `admin-course-list.php?page=${page}&${queryParams}`;
         }
 
         window.addEventListener('DOMContentLoaded', function() {

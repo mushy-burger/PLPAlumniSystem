@@ -50,6 +50,7 @@ $recent_topics_result = $conn->query($recent_topics_query);
     <title>Admin Dashboard | Alumni Portal</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body class="dashboard-body">
@@ -82,7 +83,7 @@ $recent_topics_result = $conn->query($recent_topics_query);
                 <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
                 <a href="admin-event.php"> <img src="images/calendar.png" alt="Events"><span>Events</span></a>
                 <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-                <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+                <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
                 <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
                 <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
             </div>
@@ -231,16 +232,26 @@ $recent_topics_result = $conn->query($recent_topics_query);
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <div class="event-modal-header">
-                <h2 id="eventTitle"></h2>
+                <h2 id="eventTitle" class="event-title"></h2>
                 <div class="event-banner-container">
                     <img id="eventBanner" src="" alt="Event Banner">
                 </div>
             </div>
             <div class="event-modal-body">
-                <p><strong>Schedule:</strong> <span id="eventSchedule"></span></p>
-                <hr>
-                <h3>Description:</h3>
-                <div id="eventContent"></div>
+                <div class="event-info">
+                    <div class="event-detail">
+                        <i class="fas fa-calendar"></i>
+                        <span><strong>Schedule:</strong> <span id="eventSchedule"></span></span>
+                    </div>
+                    <div class="event-detail">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span><strong>Location:</strong> <span id="eventLocation"></span></span>
+                    </div>
+                </div>
+                <div class="event-description">
+                    <h3>Description</h3>
+                    <div id="eventContent"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -283,47 +294,117 @@ $recent_topics_result = $conn->query($recent_topics_query);
 
         .modal-content {
             background-color: white;
-            border-radius: 8px;
+            border-radius: 12px;
             width: 90%;
             max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 30px;
+            padding: 0;
             position: relative;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             animation: slideIn 0.3s ease;
         }
 
-        @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .event-modal-header {
+            padding: 25px 30px;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
         }
 
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            color: #adb5bd;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .close-modal:hover {
-            color: #212529;
+        .event-title {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
         }
 
         .event-banner-container {
-            margin-top: 15px;
-            margin-bottom: 15px;
+            margin: 15px 0;
             text-align: center;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .event-banner-container img {
             max-width: 100%;
             max-height: 300px;
             border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .event-modal-body {
+            padding: 25px 30px;
+        }
+
+        .event-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .event-detail {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #495057;
+        }
+
+        .event-detail i {
+            color: #6c757d;
+            font-size: 18px;
+        }
+
+        .event-description {
+            margin-top: 20px;
+        }
+
+        .event-description h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .event-description p {
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 1;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .close-modal:hover {
+            color: #212529;
+            background: rgba(255, 255, 255, 1);
+            transform: rotate(90deg);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .forum-meta {
@@ -381,15 +462,10 @@ $recent_topics_result = $conn->query($recent_topics_query);
             eventButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const eventId = this.getAttribute('data-id');
-                    console.log('Event button clicked, ID:', eventId);
                     
                     fetch(`get_event_details.php?id=${eventId}`)
-                        .then(response => {
-                            console.log('Response status:', response.status);
-                            return response.json();
-                        })
+                        .then(response => response.json())
                         .then(data => {
-                            console.log('Event data received:', data);
                             document.getElementById('eventTitle').innerText = data.title;
                             
                             const eventDate = new Date(data.schedule);
@@ -402,14 +478,23 @@ $recent_topics_result = $conn->query($recent_topics_query);
                                 minute: 'numeric'
                             });
                             
-                            document.getElementById('eventContent').innerHTML = data.content;
+                            const locationElement = document.getElementById('eventLocation');
+                            if (data.location) {
+                                locationElement.innerText = data.location;
+                                locationElement.parentElement.parentElement.style.display = 'flex';
+                            } else {
+                                locationElement.parentElement.parentElement.style.display = 'none';
+                            }
+                            
+                            const contentElement = document.getElementById('eventContent');
+                            contentElement.innerHTML = data.content.replace(/\n/g, '<br>');
                             
                             const bannerImg = document.getElementById('eventBanner');
                             if (data.banner && data.banner !== '') {
                                 bannerImg.src = data.banner;
                                 bannerImg.style.display = 'block';
                             } else {
-                                bannerImg.src = 'images/no-image-available.png';
+                                bannerImg.src = 'images/no-image.jpg';
                                 bannerImg.style.display = 'block';
                             }
                             

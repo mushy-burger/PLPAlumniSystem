@@ -6,6 +6,16 @@ $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $items_per_page = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $offset = ($page - 1) * $items_per_page;
 
+function build_query_params($exclude = []) {
+    $params = [];
+    foreach ($_GET as $key => $value) {
+        if (!in_array($key, $exclude)) {
+            $params[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
+        }
+    }
+    return implode('&', $params);
+}
+
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 $search_condition = '';
 if (!empty($search)) {
@@ -84,15 +94,15 @@ $total_row = $total_result->fetch_assoc();
 $total_records = $total_row['total'];
 $total_pages = ceil($total_records / $items_per_page);
 
-function build_query_params($exclude = []) {
-    $params = [];
-    foreach ($_GET as $key => $value) {
-        if (!in_array($key, $exclude)) {
-            $params[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
-        }
-    }
-    return implode('&', $params);
+if (!$total_result) {
+    die("Error in total query: " . $conn->error);
 }
+
+echo "<!--\nDebug Info:\n";
+echo "Total Records: " . $total_records . "\n";
+echo "Items Per Page: " . $items_per_page . "\n";
+echo "Total Pages: " . $total_pages . "\n";
+echo "Current Page: " . $page . "\n-->\n";
 ?>
 
 <!DOCTYPE html>
@@ -130,7 +140,7 @@ function build_query_params($exclude = []) {
       <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
       <a href="admin-event.php"><img src="images/calendar.png" alt="Events"><span>Events</span></a>
       <a href="admin-forums.php" class="active"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-      <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+      <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
       <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
       <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
     </div>
@@ -182,10 +192,10 @@ function build_query_params($exclude = []) {
               <button type="submit" style="display:none;">Search</button>
             </form>
           </div>
-        </div>
 
-        <div class="add-topic-forum">
-          <button onclick="openCreateModal()"><i class="plus-icon">+</i> Create New Post</button>
+          <div class="add-topic-forum">
+            <button onclick="openCreateModal()"><i class="plus-icon">+</i> Create New Post</button>
+          </div>
         </div>
       </div>
 
@@ -244,30 +254,44 @@ function build_query_params($exclude = []) {
         </table>
       </div>
 
-      <?php if($total_pages > 1): ?>
-      <div class="pagination-container">
-        <ul class="pagination">
-          <?php if($page > 1): ?>
-            <li><a href="?page=1&<?php echo build_query_params(['page']); ?>">First</a></li>
-            <li><a href="?page=<?php echo $page-1; ?>&<?php echo build_query_params(['page']); ?>">Previous</a></li>
-          <?php endif; ?>
-          
-          <?php
-          $start_page = max(1, $page - 2);
-          $end_page = min($total_pages, $start_page + 4);
-          
-          for($i = $start_page; $i <= $end_page; $i++):
-          ?>
-            <li class="<?php echo ($i == $page) ? 'active' : ''; ?>">
-              <a href="?page=<?php echo $i; ?>&<?php echo build_query_params(['page']); ?>"><?php echo $i; ?></a>
-            </li>
-          <?php endfor; ?>
-          
-          <?php if($page < $total_pages): ?>
-            <li><a href="?page=<?php echo $page+1; ?>&<?php echo build_query_params(['page']); ?>">Next</a></li>
-            <li><a href="?page=<?php echo $total_pages; ?>&<?php echo build_query_params(['page']); ?>">Last</a></li>
-          <?php endif; ?>
-        </ul>
+      <?php
+      $total_pages = ceil($total_records / $items_per_page);
+      
+      if($total_pages > 0):
+      ?>
+      <div class="table-footer">
+        <div class="pagination-container">
+          <ul class="pagination">
+            <?php if($page > 1): ?>
+              <li><a href="?page=1&<?php echo build_query_params(['page']); ?>">Previous</a></li>
+            <?php endif; ?>
+
+            <?php
+            if($page > 3) {
+                echo '<li><a href="?page=1&' . build_query_params(['page']) . '">1</a></li>';
+                if($page > 4) {
+                    echo '<li><span>...</span></li>';
+                }
+            }
+
+            for($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++) {
+                echo '<li class="' . ($i == $page ? 'active' : '') . '">';
+                echo '<a href="?page=' . $i . '&' . build_query_params(['page']) . '">' . $i . '</a>';
+                echo '</li>';
+            }
+
+            if($page < $total_pages - 2) {
+                if($page < $total_pages - 3) {
+                    echo '<li><span>...</span></li>';
+                }
+                echo '<li><a href="?page=' . $total_pages . '&' . build_query_params(['page']) . '">' . $total_pages . '</a></li>';
+            }
+
+            if($page < $total_pages): ?>
+              <li><a href="?page=<?php echo ($page + 1); ?>&<?php echo build_query_params(['page']); ?>">Next</a></li>
+            <?php endif; ?>
+          </ul>
+        </div>
       </div>
       <?php endif; ?>
     </div>

@@ -12,7 +12,7 @@ $admin_id = 1;
 
 switch ($action) {
     case 'add':
-        if (empty($_POST['company']) || empty($_POST['job_title']) || empty($_POST['location']) || empty($_POST['description'])) {
+        if (empty($_POST['company']) || empty($_POST['job_title']) || empty($_POST['location']) || empty($_POST['modality']) || empty($_POST['description'])) {
             $_SESSION['error'] = "All fields are required";
             header('Location: ../admin-job.php');
             exit();
@@ -21,10 +21,12 @@ switch ($action) {
         $company = $conn->real_escape_string($_POST['company']);
         $job_title = $conn->real_escape_string($_POST['job_title']);
         $location = $conn->real_escape_string($_POST['location']);
+        $modality = $conn->real_escape_string($_POST['modality']);
+        $combined_location = $location . ' (' . $modality . ')';
         $description = $conn->real_escape_string($_POST['description']);
         
         $stmt = $conn->prepare("INSERT INTO careers (company, location, job_title, description, user_id) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssi", $company, $location, $job_title, $description, $admin_id);
+        $stmt->bind_param("ssssi", $company, $combined_location, $job_title, $description, $admin_id);
         
         if ($stmt->execute()) {
             $_SESSION['success'] = "Job opportunity added successfully!";
@@ -36,7 +38,7 @@ switch ($action) {
         break;
 
     case 'edit':
-        if (empty($_POST['job_id']) || empty($_POST['company']) || empty($_POST['job_title']) || empty($_POST['location']) || empty($_POST['description'])) {
+        if (empty($_POST['job_id']) || empty($_POST['company']) || empty($_POST['job_title']) || empty($_POST['location']) || empty($_POST['modality']) || empty($_POST['description'])) {
             $_SESSION['error'] = "All fields are required";
             header('Location: ../admin-job.php');
             exit();
@@ -45,10 +47,12 @@ switch ($action) {
         $company = $conn->real_escape_string($_POST['company']);
         $job_title = $conn->real_escape_string($_POST['job_title']);
         $location = $conn->real_escape_string($_POST['location']);
+        $modality = $conn->real_escape_string($_POST['modality']);
+        $combined_location = $location . ' (' . $modality . ')';
         $description = $conn->real_escape_string($_POST['description']);
         
         $stmt = $conn->prepare("UPDATE careers SET company = ?, location = ?, job_title = ?, description = ? WHERE id = ?");
-        $stmt->bind_param("ssssi", $company, $location, $job_title, $description, $job_id);
+        $stmt->bind_param("ssssi", $company, $combined_location, $job_title, $description, $job_id);
         
         if ($stmt->execute()) {
             $_SESSION['success'] = "Job opportunity updated successfully!";

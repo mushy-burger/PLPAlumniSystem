@@ -296,7 +296,8 @@ CREATE TABLE `users` (
   `username` varchar(200) NOT NULL,
   `password` text NOT NULL,
   `type` tinyint(1) NOT NULL DEFAULT 3 COMMENT '1=Admin,2=Alumni officer, 3= alumnus',
-  `auto_generated_pass` text NOT NULL
+  `auto_generated_pass` text NOT NULL,
+  `is_default_password` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=Using default password, 0=Password changed'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

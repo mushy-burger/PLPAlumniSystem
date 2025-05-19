@@ -3,7 +3,7 @@ session_start();
 include 'admin/db_connect.php';
 
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-$items_per_page = 12;
+$items_per_page = isset($_GET['limit']) ? intval($_GET['limit']) : 15;
 $offset = ($page - 1) * $items_per_page;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -332,74 +332,78 @@ if(isset($_SESSION['login_id'])) {
                 <p>Connect with the PLP community and discover fellow alumni</p>
             </header>
             
-            <div class="filter-container">
-                <button id="toggle-filters" class="toggle-filters-btn">Show Filters</button>
-                
-                <div id="filter-panel" class="filter-panel">
-                    <form method="GET" action="" id="filter-form">
-                        <div class="filter-grid">
-                            <div class="filter-group">
-                                <label for="search">Search:</label>
-                                <div class="search-input">
-                                    <input type="text" id="search" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by name or ID">
-                                    <button type="submit" class="search-icon"><i class="fas fa-search"></i></button>
-                                </div>
-                            </div>
-                            
-                            <div class="filter-group">
-                                <label for="course">Course:</label>
-                                <select id="course" name="course">
-                                    <option value="0">All Courses</option>
-                                    <?php foreach ($courses as $id => $course): ?>
-                                    <option value="<?php echo $id; ?>" <?php echo $course_filter == $id ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($course); ?>
-                                    </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            
-                            <div class="filter-group">
-                                <label for="batch">Batch Year:</label>
-                                <select id="batch" name="batch">
-                                    <option value="">All Years</option>
-                                    <?php foreach ($batches as $batch): ?>
-                                    <option value="<?php echo $batch; ?>" <?php echo $batch_filter == $batch ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($batch); ?>
-                                    </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            
-                            <div class="filter-group">
-                                <label for="connected">Connection Status:</label>
-                                <select id="connected" name="connected">
-                                    <option value="">All</option>
-                                    <option value="1" <?php echo $connected_filter === '1' ? 'selected' : ''; ?>>Connected</option>
-                                    <option value="0" <?php echo $connected_filter === '0' ? 'selected' : ''; ?>>Not Connected</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="filter-actions">
-                            <button type="submit" class="btn-apply-filter">Apply</button>
-                            <a href="alumni-list.php" class="btn-reset-filter">Reset</a>
+            <div class="top-controls">
+                <div class="search-container">
+                    <form method="GET" action="" id="search-form">
+                        <div class="search-input">
+                            <input type="text" id="search" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by name or ID">
+                            <button type="submit" class="search-icon"><i class="fas fa-search"></i></button>
                         </div>
                     </form>
                 </div>
+                
+                <div class="filter-container">
+                    <button id="toggle-filters" class="toggle-filters-btn">Show Filters</button>
+                </div>
+
+                <div class="alumni-stats">
+                    <div class="stat-box">
+                        <span class="stat-number"><?php echo $total_records; ?></span>
+                        <span class="stat-label">Total Alumni</span>
+                    </div>
+                    
+                    <?php if (count($filter_conditions) > 0): ?>
+                    <div class="stat-box filtered">
+                        <span class="stat-number"><?php echo count($filter_conditions); ?></span>
+                        <span class="stat-label">Active Filters</span>
+                    </div>
+                    <?php endif; ?>
+                </div>
             </div>
 
-            <div class="alumni-stats">
-                <div class="stat-box">
-                    <span class="stat-number"><?php echo $total_records; ?></span>
-                    <span class="stat-label">Total Alumni</span>
-                </div>
-                
-                <?php if (count($filter_conditions) > 0): ?>
-                <div class="stat-box filtered">
-                    <span class="stat-number"><?php echo count($filter_conditions); ?></span>
-                    <span class="stat-label">Active Filters</span>
-                </div>
-                <?php endif; ?>
+            <div id="filter-panel" class="filter-panel">
+                <form method="GET" action="" id="filter-form">
+                    <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label for="course">Course:</label>
+                            <select id="course" name="course">
+                                <option value="0">All Courses</option>
+                                <?php foreach ($courses as $id => $course): ?>
+                                <option value="<?php echo $id; ?>" <?php echo $course_filter == $id ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($course); ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="batch">Batch Year:</label>
+                            <select id="batch" name="batch">
+                                <option value="">All Years</option>
+                                <?php foreach ($batches as $batch): ?>
+                                <option value="<?php echo $batch; ?>" <?php echo $batch_filter == $batch ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($batch); ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="connected">Connection Status:</label>
+                            <select id="connected" name="connected">
+                                <option value="">All</option>
+                                <option value="1" <?php echo $connected_filter === '1' ? 'selected' : ''; ?>>Connected</option>
+                                <option value="0" <?php echo $connected_filter === '0' ? 'selected' : ''; ?>>Not Connected</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-apply-filter">Apply</button>
+                        <a href="alumni-list.php" class="btn-reset-filter">Reset</a>
+                    </div>
+                </form>
             </div>
 
             <div class="alumni-grid">
@@ -437,23 +441,16 @@ if(isset($_SESSION['login_id'])) {
 
             <?php if($total_pages > 1): ?>
             <div class="pagination">
-                <?php if($page > 1): ?>
-                    <a href="?page=1&<?php echo build_query_params(['page']); ?>" class="page-link">&laquo; First</a>
-                    <a href="?page=<?php echo $page-1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">&lsaquo; Prev</a>
-                <?php endif; ?>
+                <button <?php echo $page <= 1 ? 'disabled' : ''; ?> 
+                        onclick="changePage(<?php echo $page - 1; ?>)">Previous</button>
                 
-                <?php
-                $start_page = max(1, $page - 2);
-                $end_page = min($total_pages, $start_page + 4);
-                for($i = $start_page; $i <= $end_page; $i++):
-                ?>
-                    <a href="?page=<?php echo $i; ?>&<?php echo build_query_params(['page']); ?>" class="page-link <?php echo ($i == $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <button <?php echo $i == $page ? 'class="active"' : ''; ?> 
+                            onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
                 <?php endfor; ?>
                 
-                <?php if($page < $total_pages): ?>
-                    <a href="?page=<?php echo $page+1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Next &rsaquo;</a>
-                    <a href="?page=<?php echo $total_pages; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Last &raquo;</a>
-                <?php endif; ?>
+                <button <?php echo $page >= $total_pages ? 'disabled' : ''; ?> 
+                        onclick="changePage(<?php echo $page + 1; ?>)">Next</button>
             </div>
             <?php endif; ?>
         </div>
@@ -466,13 +463,39 @@ if(isset($_SESSION['login_id'])) {
                 toggleBtn.innerHTML = sidebar.classList.contains('collapsed') ? '&#x25B6;' : '&#x25C0;';
             }
             
-            document.getElementById('toggle-filters').addEventListener('click', function() {
-                const filterPanel = document.getElementById('filter-panel');
-                const isVisible = filterPanel.classList.toggle('active');
-                this.textContent = isVisible ? 'Hide Filters' : 'Show Filters';
-            });
+            function changePage(page) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('page', page);
+                window.location.href = currentUrl.toString();
+            }
             
             document.addEventListener('DOMContentLoaded', function() {
+                const searchForm = document.getElementById('search-form');
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                
+                    const searchValue = document.getElementById('search').value;
+                    
+                    const currentUrl = new URL(window.location.href);
+                    
+                    if (searchValue) {
+                        currentUrl.searchParams.set('search', searchValue);
+                    } else {
+                        currentUrl.searchParams.delete('search');
+                    }
+                    
+                    currentUrl.searchParams.delete('page');
+                    
+                    window.location.href = currentUrl.toString();
+                });
+                
+                const toggleFiltersBtn = document.getElementById('toggle-filters');
+                toggleFiltersBtn.addEventListener('click', function() {
+                    const filterPanel = document.getElementById('filter-panel');
+                    const isVisible = filterPanel.classList.toggle('active');
+                    this.textContent = isVisible ? 'Hide Filters' : 'Show Filters';
+                });
+                
                 const activeFilters = <?php echo count($filter_conditions); ?>;
                 if (activeFilters > 0) {
                     document.getElementById('filter-panel').classList.add('active');

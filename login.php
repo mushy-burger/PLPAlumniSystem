@@ -8,7 +8,9 @@ if(isset($_POST['login'])) {
     $alumni_id = $conn->real_escape_string($_POST['alumni_id']);
     $password = md5($_POST['password']); // Note: MD5 is used to match existing hashing in the database
     
-    $sql = "SELECT u.*, a.status FROM users u LEFT JOIN alumnus_bio a ON u.alumni_id = a.alumni_id WHERE u.alumni_id = ? AND u.password = ?";
+    $sql = "SELECT u.*, a.status, u.is_default_password FROM users u 
+            LEFT JOIN alumnus_bio a ON u.alumni_id = a.alumni_id 
+            WHERE u.alumni_id = ? AND u.password = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $alumni_id, $password);
     $stmt->execute();
@@ -17,7 +19,16 @@ if(isset($_POST['login'])) {
     if($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         
-        if($row['type'] == 3 && $row['status'] == 0) {
+        // Check if user is using default password
+        if($row['type'] == 3 && $row['is_default_password'] == 1) {
+            $_SESSION['temp_login_id'] = $row['alumni_id'];
+            $_SESSION['temp_login_name'] = $row['name'];
+            $_SESSION['require_password_change'] = true;
+            header("Location: change_password.php");
+            exit;
+        }
+        // Check verification status only if password has been changed
+        else if($row['type'] == 3 && $row['status'] == 0) {
             $error_msg = "Your account is pending verification. Please contact the administrator.";
         } else {
             $_SESSION['login_id'] = $row['alumni_id'];
@@ -41,22 +52,29 @@ if(isset($_POST['login'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">  cc
+  <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PLP Alumni - Log In</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
-    /* Override styles for back button icon */
-    .back-link .back-icon,
-    .back-link i.fas.fa-arrow-left {
-      font-size: 24px !important;
-    }
-    
     .back-link {
-      width: 50px !important;
-      height: 50px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: #1a237e;
+    }
+    .back-link:hover {
+      background: #e3e6f3;
+    }
+    .back-link .fa-arrow-left {
+      font-size: 20px;
     }
   </style>
 </head>
@@ -71,7 +89,7 @@ if(isset($_POST['login'])) {
     </div>
   </div>
   <div class="header-right">
-    <a href="landing.php" class="back-link" title="Back to Landing Page"><i class="fas fa-arrow-left back-icon" style="font-size: 36px !important;"></i></a>
+    <a href="landing.php" class="back-link" title="Back to Landing Page"><i class="fas fa-arrow-left"></i></a>
   </div>
 </header>
 
@@ -131,10 +149,13 @@ if(isset($_POST['login'])) {
               <i class="fas fa-lock"></i>
               <input type="password" id="password" name="password" placeholder="Enter your password" required>
             </div>
-            <div class="password-options">
-              <label class="show-password">
-                <input type="checkbox" id="showPassword"> 
-                <span>Show Password</span>
+            <div class="password-options" style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+              <a href="forgot_password.php" style="color: #0047AB; text-decoration: none; font-size: 0.9rem;">
+                Forgot Password?
+              </a>
+              <label class="show-password" style="color: #0047AB; font-size: 0.9rem;">
+                <input type="checkbox" id="showPassword" style="margin-right: 5px;"> 
+                Show Password
               </label>
             </div>
           </div>

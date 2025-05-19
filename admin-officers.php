@@ -2,21 +2,17 @@
 session_start();
 include 'admin/db_connect.php';
 
-// Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['add_officer']) || isset($_POST['update_officer'])) {
         $name = $conn->real_escape_string($_POST['name']);
         $position = $conn->real_escape_string($_POST['position']);
         $class_year = $conn->real_escape_string($_POST['class_year']);
         $course = $conn->real_escape_string($_POST['course']);
-        $display_order = intval($_POST['display_order']);
         $image_path = '';
         
-        // Handle image upload
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             $target_dir = "uploads/officers/";
             
-            // Create directory if it doesn't exist
             if (!file_exists($target_dir)) {
                 mkdir($target_dir, 0777, true);
             }
@@ -25,10 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $new_filename = uniqid() . '.' . $file_extension;
             $target_file = $target_dir . $new_filename;
             
-            // Check if image file is a actual image
             $check = getimagesize($_FILES["image"]["tmp_name"]);
             if ($check !== false) {
-                // Upload file
                 if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
                     $image_path = $target_file;
                 }
@@ -36,9 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         if (isset($_POST['add_officer'])) {
-            // Add new officer
-            $sql = "INSERT INTO alumni_officers (name, position, class_year, course, image_path, display_order) 
-                    VALUES ('$name', '$position', '$class_year', '$course', '$image_path', $display_order)";
+            $sql = "INSERT INTO alumni_officers (name, position, class_year, course, image_path) 
+                    VALUES ('$name', '$position', '$class_year', '$course', '$image_path')";
             
             if ($conn->query($sql)) {
                 $success_msg = "New officer added successfully!";
@@ -46,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $error_msg = "Error: " . $conn->error;
             }
         } else if (isset($_POST['update_officer'])) {
-            // Update existing officer
             $id = intval($_POST['officer_id']);
             
             if (empty($image_path)) {
@@ -54,11 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         name = '$name', 
                         position = '$position', 
                         class_year = '$class_year', 
-                        course = '$course', 
-                        display_order = $display_order 
+                        course = '$course'
                         WHERE id = $id";
             } else {
-                // Get the old image path to delete
                 $old_image_query = "SELECT image_path FROM alumni_officers WHERE id = $id";
                 $old_image_result = $conn->query($old_image_query);
                 if ($old_image_result && $old_image_result->num_rows > 0) {
@@ -73,8 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         position = '$position', 
                         class_year = '$class_year', 
                         course = '$course', 
-                        image_path = '$image_path', 
-                        display_order = $display_order 
+                        image_path = '$image_path'
                         WHERE id = $id";
             }
             
@@ -85,10 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     } else if (isset($_POST['delete_officer'])) {
-        // Delete officer
         $id = intval($_POST['officer_id']);
         
-        // Get the image path to delete
         $image_query = "SELECT image_path FROM alumni_officers WHERE id = $id";
         $image_result = $conn->query($image_query);
         if ($image_result && $image_result->num_rows > 0) {
@@ -107,9 +94,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Get all officers
-$officers_query = "SELECT * FROM alumni_officers ORDER BY display_order, position";
+$current_year = date('Y');
+$selected_year = isset($_GET['year']) ? $_GET['year'] : $current_year;
+
+$years_query = "SELECT DISTINCT class_year FROM alumni_officers ORDER BY class_year DESC";
+$years_result = $conn->query($years_query);
+$available_years = [];
+while($row = $years_result->fetch_assoc()) {
+    $available_years[] = $row['class_year'];
+}
+
+$officers_query = "SELECT * FROM alumni_officers 
+                  WHERE class_year = '$selected_year' 
+                  ORDER BY 
+                  CASE position 
+                      WHEN 'President' THEN 1
+                      WHEN 'Vice President' THEN 2
+                      WHEN 'Secretary' THEN 3
+                      WHEN 'Treasurer' THEN 4
+                      WHEN 'Auditor' THEN 5
+                      WHEN 'Public Relations Officer' THEN 6
+                      WHEN 'Project Coordinator' THEN 7
+                      WHEN 'Board Member' THEN 8
+                      ELSE 9
+                  END, name";
 $officers_result = $conn->query($officers_query);
+
+$count_query = "SELECT COUNT(*) as count FROM alumni_officers WHERE class_year = '$selected_year'";
+$count_result = $conn->query($count_query);
+$officers_count = $count_result->fetch_assoc()['count'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -298,7 +311,7 @@ $officers_result = $conn->query($officers_query);
         }
         
         .alert-success:before {
-            content: '\f058'; /* check-circle icon */
+            content: '\f058'; 
         }
         
         .alert-danger {
@@ -308,7 +321,7 @@ $officers_result = $conn->query($officers_query);
         }
         
         .alert-danger:before {
-            content: '\f057'; /* times-circle icon */
+            content: '\f057';
         }
         
         .edit-form {
@@ -410,6 +423,37 @@ $officers_result = $conn->query($officers_query);
             font-size: 12px;
             font-weight: bold;
         }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .year-selector {
+            margin: 0;
+        }
+        
+        .year-selector select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #333;
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .year-selector select:hover {
+            border-color: #0047AB;
+        }
+        
+        .year-selector select:focus {
+            border-color: #0047AB;
+            box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.1);
+            outline: none;
+        }
     </style>
 </head>
 
@@ -443,7 +487,7 @@ $officers_result = $conn->query($officers_query);
                 <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
                 <a href="admin-event.php"> <img src="images/calendar.png" alt="Events"><span>Events</span></a>
                 <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-                <a href="admin-officers.php" class="active"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+                <a href="admin-officers.php" class="active"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
                 <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
                 <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
             </div>
@@ -478,7 +522,17 @@ $officers_result = $conn->query($officers_query);
                             
                             <div class="form-group">
                                 <label for="position">Position</label>
-                                <input type="text" class="form-control" id="position" name="position" required placeholder="e.g., President, Secretary">
+                                <select class="form-control" id="position" name="position" required>
+                                    <option value="">Select Position</option>
+                                    <option value="President">President</option>
+                                    <option value="Vice President">Vice President</option>
+                                    <option value="Secretary">Secretary</option>
+                                    <option value="Treasurer">Treasurer</option>
+                                    <option value="Auditor">Auditor</option>
+                                    <option value="Public Relations Officer">Public Relations Officer</option>
+                                    <option value="Project Coordinator">Project Coordinator</option>
+                                    <option value="Board Member">Board Member</option>
+                                </select>
                             </div>
                             
                             <div class="form-group">
@@ -491,11 +545,6 @@ $officers_result = $conn->query($officers_query);
                             <div class="form-group">
                                 <label for="course">Course</label>
                                 <input type="text" class="form-control" id="course" name="course" placeholder="e.g., BS Computer Science">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="display_order">Display Order</label>
-                                <input type="number" class="form-control" id="display_order" name="display_order" value="0" min="0" placeholder="Lower numbers appear first">
                             </div>
                             
                             <div class="form-group">
@@ -515,10 +564,21 @@ $officers_result = $conn->query($officers_query);
             </div>
             
             <div class="section-header">
-                <h3 class="section-title">Current Officers</h3>
-                <?php if($officers_result && $officers_result->num_rows > 0): ?>
-                    <span class="officer-count"><?php echo $officers_result->num_rows; ?> Officers</span>
-                <?php endif; ?>
+                <h3 class="section-title">Officers (<?php echo $selected_year; ?>)</h3>
+                <div class="header-actions">
+                    <form method="get" class="year-selector">
+                        <select name="year" onchange="this.form.submit()" class="form-control">
+                            <?php foreach($available_years as $year): ?>
+                                <option value="<?php echo $year; ?>" <?php echo $year == $selected_year ? 'selected' : ''; ?>>
+                                    <?php echo $year; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
+                    <?php if($officers_count > 0): ?>
+                        <span class="officer-count"><?php echo $officers_count; ?> Officers</span>
+                    <?php endif; ?>
+                </div>
             </div>
             
             <?php if($officers_result && $officers_result->num_rows > 0): ?>
@@ -527,7 +587,6 @@ $officers_result = $conn->query($officers_query);
                         <div class="officer-card">
                             <div class="officer-image">
                                 <img src="<?php echo !empty($officer['image_path']) ? $officer['image_path'] : 'images/user.jpg'; ?>" alt="<?php echo htmlspecialchars($officer['position']); ?>">
-                                <div class="officer-badge">Order: <?php echo $officer['display_order']; ?></div>
                             </div>
                             <div class="officer-info">
                                 <h3><?php echo htmlspecialchars($officer['name']); ?></h3>
@@ -538,8 +597,7 @@ $officers_result = $conn->query($officers_query);
                                             data-name="<?php echo htmlspecialchars($officer['name']); ?>"
                                             data-position="<?php echo htmlspecialchars($officer['position']); ?>"
                                             data-class-year="<?php echo htmlspecialchars($officer['class_year']); ?>"
-                                            data-course="<?php echo htmlspecialchars($officer['course']); ?>"
-                                            data-order="<?php echo $officer['display_order']; ?>">
+                                            data-course="<?php echo htmlspecialchars($officer['course']); ?>">
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
                                     <form action="" method="post" style="display:inline;">
@@ -560,7 +618,6 @@ $officers_result = $conn->query($officers_query);
                 </div>
             <?php endif; ?>
             
-            <!-- Edit Form (Hidden by default) -->
             <div class="form-container edit-form" id="editForm">
                 <h3 class="form-title">Edit Officer</h3>
                 <form action="" method="post" enctype="multipart/form-data">
@@ -575,7 +632,17 @@ $officers_result = $conn->query($officers_query);
                             
                             <div class="form-group">
                                 <label for="edit_position">Position</label>
-                                <input type="text" class="form-control" id="edit_position" name="position" required>
+                                <select class="form-control" id="edit_position" name="position" required>
+                                    <option value="">Select Position</option>
+                                    <option value="President">President</option>
+                                    <option value="Vice President">Vice President</option>
+                                    <option value="Secretary">Secretary</option>
+                                    <option value="Treasurer">Treasurer</option>
+                                    <option value="Auditor">Auditor</option>
+                                    <option value="Public Relations Officer">Public Relations Officer</option>
+                                    <option value="Project Coordinator">Project Coordinator</option>
+                                    <option value="Board Member">Board Member</option>
+                                </select>
                             </div>
                             
                             <div class="form-group">
@@ -588,11 +655,6 @@ $officers_result = $conn->query($officers_query);
                             <div class="form-group">
                                 <label for="edit_course">Course</label>
                                 <input type="text" class="form-control" id="edit_course" name="course">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="edit_display_order">Display Order</label>
-                                <input type="number" class="form-control" id="edit_display_order" name="display_order" min="0">
                             </div>
                             
                             <div class="form-group">
@@ -619,12 +681,11 @@ $officers_result = $conn->query($officers_query);
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('collapsed');
             
-            // Change the toggle button direction
             const toggleBtn = document.querySelector('.toggle-btn');
             if (sidebar.classList.contains('collapsed')) {
-                toggleBtn.innerHTML = '&#x25B6;'; // Right arrow
+                toggleBtn.innerHTML = '&#x25B6;'; 
             } else {
-                toggleBtn.innerHTML = '&#x25C0;'; // Left arrow
+                toggleBtn.innerHTML = '&#x25C0;'; 
             }
         }
         
@@ -648,7 +709,6 @@ $officers_result = $conn->query($officers_query);
             }
         }
         
-        // Edit functionality
         document.addEventListener('DOMContentLoaded', function() {
             const editButtons = document.querySelectorAll('.edit-btn');
             const editForm = document.getElementById('editForm');
@@ -662,32 +722,25 @@ $officers_result = $conn->query($officers_query);
                     const position = this.getAttribute('data-position');
                     const classYear = this.getAttribute('data-class-year');
                     const course = this.getAttribute('data-course');
-                    const order = this.getAttribute('data-order');
                     
-                    // Fill the edit form
                     document.getElementById('edit_officer_id').value = id;
                     document.getElementById('edit_name').value = name;
                     document.getElementById('edit_position').value = position;
                     document.getElementById('edit_class_year').value = classYear;
                     document.getElementById('edit_course').value = course;
-                    document.getElementById('edit_display_order').value = order;
                     
-                    // Show edit form and hide add form
                     editForm.style.display = 'block';
                     addForm.closest('.form-container').style.display = 'none';
                     
-                    // Scroll to edit form
                     editForm.scrollIntoView({behavior: 'smooth'});
                 });
             });
             
             cancelEditBtn.addEventListener('click', function() {
-                // Hide edit form and show add form
                 editForm.style.display = 'none';
                 addForm.closest('.form-container').style.display = 'block';
             });
             
-            // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert');
             if (alerts.length > 0) {
                 setTimeout(function() {

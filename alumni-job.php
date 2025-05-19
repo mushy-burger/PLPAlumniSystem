@@ -211,15 +211,13 @@ if(isset($_SESSION['login_id'])) {
         <button type="submit" class="apply-filter-btn">Apply</button>
         <a href="alumni-job.php" class="reset-btn">Reset</a>
       </div>
-    </form>
 
-    <?php if(isset($_SESSION['login_id'])): ?>
-    <div class="add-job-section">
-      <button class="add-job-btn" onclick="openPostJobModal()">
+      <?php if(isset($_SESSION['login_id'])): ?>
+      <button type="button" class="post-job-btn" onclick="openPostJobModal()">
         <i class="fas fa-plus-circle"></i> Add New Job Listing
       </button>
-    </div>
-    <?php endif; ?>
+      <?php endif; ?>
+    </form>
 
     <div class="job-cards">
       <?php if($result->num_rows > 0): ?>
@@ -235,32 +233,34 @@ if(isset($_SESSION['login_id'])) {
             </div>
             <p><?php echo substr(strip_tags(html_entity_decode($job['description'])), 0, 150) . '...'; ?></p>
             <div class="job-footer">
-              <span class="posted-by">
-                <i class="fas fa-user"></i> By: <?php echo htmlspecialchars($job['posted_by'] ?? 'Admin'); ?>
-              </span>
-              <div class="job-actions">
+              <div class="job-actions-top">
+                <span class="posted-by">
+                  <i class="fas fa-user"></i> By: <?php echo htmlspecialchars($job['posted_by'] ?? 'Admin'); ?>
+                </span>
                 <button class="read-more" data-id="<?php echo $job['id']; ?>">Read More</button>
+              </div>
                 
-                <?php 
-                $current_user = isset($_SESSION['login_id']) ? $_SESSION['login_id'] : 'Not logged in';
-                $job_owner = $job['user_id'] ?? 'No user ID';
-                
-                $is_owner = false;
-                
-                if (isset($_SESSION['login_id'])) {
-                  if ($_SESSION['login_id'] === $job['user_id']) {
-                    $is_owner = true;
-                  }
-                  else if (strpos($job['user_id'], $_SESSION['login_id']) === 0) {
-                    $is_owner = true;
-                  }
-                  else if (strpos($_SESSION['login_id'], $job['user_id']) === 0) {
-                    $is_owner = true;
-                  }
+              <?php 
+              $current_user = isset($_SESSION['login_id']) ? $_SESSION['login_id'] : 'Not logged in';
+              $job_owner = $job['user_id'] ?? 'No user ID';
+              
+              $is_owner = false;
+              
+              if (isset($_SESSION['login_id'])) {
+                if ($_SESSION['login_id'] === $job['user_id']) {
+                  $is_owner = true;
                 }
-                
-                if($is_owner): 
-                ?>
+                else if (strpos($job['user_id'], $_SESSION['login_id']) === 0) {
+                  $is_owner = true;
+                }
+                else if (strpos($_SESSION['login_id'], $job['user_id']) === 0) {
+                  $is_owner = true;
+                }
+              }
+              
+              if($is_owner): 
+              ?>
+              <div class="job-actions-bottom">
                 <button class="edit-job-btn" 
                         data-id="<?php echo $job['id']; ?>"
                         data-title="<?php echo htmlspecialchars($job['job_title']); ?>"
@@ -268,13 +268,13 @@ if(isset($_SESSION['login_id'])) {
                         data-location="<?php echo htmlspecialchars($job['location']); ?>"
                         data-description="<?php echo htmlspecialchars($job['description']); ?>"
                         onclick="openEditJobModal(this)">
-                    <i class="fas fa-edit"></i> Edit
+                    <i class="fas fa-edit"></i> <span>Edit</span>
                 </button>
                 <button class="delete-job-btn" data-id="<?php echo $job['id']; ?>" onclick="confirmDelete(<?php echo $job['id']; ?>)">
-                    <i class="fas fa-trash"></i> Delete
+                    <i class="fas fa-trash"></i> <span>Delete</span>
                 </button>
-                <?php endif; ?>
               </div>
+              <?php endif; ?>
             </div>
           </div>
         <?php endwhile; ?>
@@ -315,14 +315,18 @@ if(isset($_SESSION['login_id'])) {
       <span class="close-button" id="closeReadMoreModal">&times;</span>
       <h2 id="modalJobTitle"></h2>
       <h4 id="modalJobCompany"></h4>
-      <div class="job-meta">
-        <p><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> <span id="modalJobLocation"></span></p>
-        <p><i class="fas fa-user"></i> <strong>Posted by:</strong> <span id="modalJobPostedBy"></span></p>
-        <p><i class="fas fa-calendar-alt"></i> <strong>Posted on:</strong> <span id="modalJobDate"></span></p>
+      <div class="job-details-meta">
+        <p><i class="fas fa-map-marker-alt"></i> <span id="modalJobLocation"></span></p>
+        <p><i class="fas fa-user"></i> <span id="modalJobPostedBy"></span></p>
+        <p><i class="fas fa-calendar-alt"></i> <span id="modalJobDate"></span></p>
       </div>
-      <hr>
       <h3>Job Description</h3>
       <div id="modalFullDescription"></div>
+      <div class="job-detail-actions">
+        <button class="job-detail-close-btn" id="closeJobDetailBtn">
+          <i class="fas fa-times-circle"></i> Close
+        </button>
+      </div>
     </div>
   </div>
 
@@ -333,27 +337,40 @@ if(isset($_SESSION['login_id'])) {
       <form id="postJobForm" action="post_job.php" method="POST">
         <div class="job-form-group">
           <label for="jobTitle">Job Position:</label>
-          <input type="text" id="jobTitle" name="job_title" required />
+          <input type="text" id="jobTitle" name="job_title" placeholder="Enter job title" required />
         </div>
 
         <div class="job-form-group">
           <label for="jobCompany">Company:</label>
-          <input type="text" id="jobCompany" name="company" required />
+          <input type="text" id="jobCompany" name="company" placeholder="Enter company name" required />
         </div>
 
         <div class="job-form-group">
-          <label for="jobLocation">Job Location:</label>
-          <select id="jobLocation" name="location" required>
-            <option value="">Select Location</option>
-            <option value="Home-based">Home-based</option>
-            <option value="On-site">On-site</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
+          <label for="jobLocation">Location:</label>
+          <input type="text" id="jobLocation" name="location" placeholder="Enter city, address, etc." required />
+        </div>
+        
+        <div class="job-form-group">
+          <label>Work Setup:</label>
+          <div class="modality-options">
+            <label class="modality-option">
+              <input type="radio" name="modality" value="WFH" required checked>
+              <span>WFH</span>
+            </label>
+            <label class="modality-option">
+              <input type="radio" name="modality" value="Onsite" required>
+              <span>Onsite</span>
+            </label>
+            <label class="modality-option">
+              <input type="radio" name="modality" value="Hybrid" required>
+              <span>Hybrid</span>
+            </label>
+          </div>
         </div>
 
         <div class="job-form-group">
           <label for="fullDescription">Job Description:</label>
-          <textarea id="fullDescription" name="description" rows="6" required></textarea>
+          <textarea id="fullDescription" name="description" rows="6" placeholder="Enter job description" required></textarea>
         </div>
 
         <button type="submit">Submit Job Posting</button>
@@ -379,13 +396,26 @@ if(isset($_SESSION['login_id'])) {
         </div>
 
         <div class="job-form-group">
-          <label for="editJobLocation">Job Location:</label>
-          <select id="editJobLocation" name="location" required>
-            <option value="">Select Location</option>
-            <option value="Home-based">Home-based</option>
-            <option value="On-site">On-site</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
+          <label for="editJobLocation">Location:</label>
+          <input type="text" id="editJobLocation" name="location" placeholder="Enter city, address, etc." required />
+        </div>
+        
+        <div class="job-form-group">
+          <label>Work Setup:</label>
+          <div class="modality-options">
+            <label class="modality-option">
+              <input type="radio" name="modality" value="WFH" required>
+              <span>WFH</span>
+            </label>
+            <label class="modality-option">
+              <input type="radio" name="modality" value="Onsite" required>
+              <span>Onsite</span>
+            </label>
+            <label class="modality-option">
+              <input type="radio" name="modality" value="Hybrid" required>
+              <span>Hybrid</span>
+            </label>
+          </div>
         </div>
 
         <div class="job-form-group">
@@ -429,10 +459,16 @@ if(isset($_SESSION['login_id'])) {
     const closeEditJobModal = document.getElementById("closeEditJobModal");
     const closeDeleteJobModal = document.getElementById("closeDeleteJobModal");
     
-    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-    
     let deleteJobId = null;
+
+    document.querySelector('.search-filter-form').addEventListener('submit', function(e) {
+      const searchInput = document.getElementById('search').value.trim();
+      const locationSelect = document.querySelector('.filter-select').value;
+      
+      if (!searchInput && !locationSelect) {
+        e.preventDefault();
+      }
+    });
 
     document.querySelectorAll(".read-more").forEach((btn) => {
       if(!btn.dataset.id) return; 
@@ -450,7 +486,7 @@ if(isset($_SESSION['login_id'])) {
             document.getElementById("modalJobDate").textContent = job.date_posted;
             document.getElementById("modalFullDescription").innerHTML = job.description;
             
-            readMoreModal.style.display = "block";
+            readMoreModal.style.display = "flex";
           })
           .catch(error => {
             console.error('Error fetching job details:', error);
@@ -472,7 +508,28 @@ if(isset($_SESSION['login_id'])) {
       document.getElementById("editJobId").value = jobId;
       document.getElementById("editJobTitle").value = jobTitle;
       document.getElementById("editJobCompany").value = company;
-      document.getElementById("editJobLocation").value = location;
+      
+      let locationText = location;
+      let modality = 'WFH'; 
+      
+      const modalityMatch = location.match(/\s*\((WFH|Onsite|Home-based|On-site|Hybrid)\)$/);
+      if (modalityMatch) {
+          locationText = location.replace(modalityMatch[0], '').trim();
+          modality = modalityMatch[1];
+          
+          if (modality === 'Home-based') modality = 'WFH';
+          if (modality === 'On-site') modality = 'Onsite';
+      }
+      
+      document.getElementById('editJobLocation').value = locationText;
+      
+      const modalityRadios = document.querySelectorAll('#editJobForm input[name="modality"]');
+      modalityRadios.forEach(radio => {
+          if (radio.value === modality) {
+              radio.checked = true;
+          }
+      });
+      
       document.getElementById("editJobDescription").value = description;
       
       editJobModal.style.display = "block";
@@ -507,6 +564,10 @@ if(isset($_SESSION['login_id'])) {
     
     closeDeleteJobModal.addEventListener("click", function() {
       deleteJobModal.style.display = "none";
+    });
+
+    document.getElementById("closeJobDetailBtn").addEventListener("click", function() {
+      readMoreModal.style.display = "none";
     });
 
     window.addEventListener("click", function(event) {

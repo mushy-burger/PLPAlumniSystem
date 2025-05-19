@@ -56,6 +56,13 @@
     flex-wrap: wrap;
 }
 
+.entries-search-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: nowrap;
+}
+
 .entries-control, .search-control {
     display: flex;
     align-items: center;
@@ -192,8 +199,8 @@
     width: 100%;
     overflow-x: auto;
     margin-top: 20px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
     background-color: white;
 }
 
@@ -201,48 +208,68 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    background-color: white;
+    overflow: hidden;
 }
 
 .job-table th {
-    background-color: #f5f7fa;
+    background-color: #3498db;
+    color: white;
     text-align: left;
-    padding: 15px;
+    padding: 15px 20px;
     font-weight: 600;
-    color: #2c3e50;
-    font-size: 14px;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #e9ecef;
+    font-size: 14px;
     position: sticky;
     top: 0;
     z-index: 10;
-}
-
-.job-table td {
-    padding: 15px;
-    border-bottom: 1px solid #e9ecef;
-    color: #555;
-    font-size: 14px;
-}
-
-.job-table tr:hover {
-    background-color: #f8f9fa;
-}
-
-.job-table tr:last-child td {
     border-bottom: none;
 }
 
+.job-table th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.job-table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.job-table td {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    font-size: 14px;
+    vertical-align: middle;
+    transition: all 0.3s;
+}
+
+.job-table tr:hover {
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+.job-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.job-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
 .view-btn, .edit-btn, .delete-btn {
-    padding: 7px 14px;
-    margin-right: 6px;
-    border: none;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: 500;
     font-size: 13px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    text-align: center;
+    border: none;
+    transition: all 0.3s;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-right: 5px;
 }
 
 .view-btn {
@@ -252,6 +279,8 @@
 
 .view-btn:hover {
     background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .edit-btn {
@@ -261,6 +290,8 @@
 
 .edit-btn:hover {
     background-color: #d35400;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .delete-btn {
@@ -270,11 +301,8 @@
 
 .delete-btn:hover {
     background-color: #c0392b;
-}
-
-.view-btn:hover, .edit-btn:hover, .delete-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .job-modal {
@@ -363,6 +391,46 @@
     line-height: 1.6;
 }
 
+.location-input-wrapper {
+    margin-bottom: 20px;
+}
+
+.modality-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.modality-option {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 15px;
+    background-color: #f5f7fa;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    color: #2c3e50;
+    transition: all 0.2s ease;
+    border: 1px solid #e5e9f0;
+}
+
+.modality-option:hover {
+    background-color: #e7f2fb;
+    border-color: #3498db;
+}
+
+.modality-option input[type="radio"] {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.modality-option input[type="radio"]:checked + span {
+    color: #3498db;
+    font-weight: 600;
+}
+
 .modal-buttons {
     display: flex;
     justify-content: flex-end;
@@ -438,13 +506,15 @@
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
 
 .pagination-info {
     color: #6c757d;
     font-size: 14px;
+    width: 100%;
+    text-align: center;
 }
 
 .pagination-info span {
@@ -462,36 +532,35 @@
 .pagination {
     display: flex;
     justify-content: center;
-    gap: 5px;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    width: 100%;
 }
 
-.pagination a, .pagination button {
-    color: #3498db;
-    padding: 8px 14px;
-    text-decoration: none;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    cursor: pointer;
+.pagination button {
+    padding: 8px 15px;
+    border: 1px solid #dee2e6;
     background-color: white;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    font-size: 14px;
+    color: #007bff;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
 }
 
-.pagination a.active {
-    background-color: #3498db;
+.pagination button:hover:not(:disabled) {
+    background-color: #e9ecef;
+    color: #0056b3;
+}
+
+.pagination button.active {
+    background-color: #007bff;
     color: white;
-    border-color: #3498db;
-}
-
-.pagination a:hover:not(.active) {
-    background-color: #f5f7fa;
-    border-color: #ced4da;
+    border-color: #007bff;
 }
 
 .pagination button:disabled {
-    color: #aaa;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
@@ -546,4 +615,18 @@
 
 .job-table td:last-child { 
     text-align: right;
+}
+
+.no-records {
+    text-align: center;
+    padding: 40px 20px !important;
+    color: #7f8c8d;
+    font-style: italic;
+    background-color: #f9f9f9;
+}
+
+.no-records i {
+    font-size: 18px;
+    margin-right: 5px;
+    color: #3498db;
 }

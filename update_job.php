@@ -19,12 +19,14 @@ $user_id = $_SESSION['login_id'];
 $job_title = trim($_POST['job_title']);
 $company = trim($_POST['company']);
 $location = trim($_POST['location']);
+$modality = trim($_POST['modality'] ?? 'WFH');
 $description = trim($_POST['description']);
 
 $errors = [];
 if (empty($job_title)) $errors[] = "Job title is required";
 if (empty($company)) $errors[] = "Company name is required";
 if (empty($location)) $errors[] = "Job location is required";
+if (empty($modality)) $errors[] = "Work setup is required";
 if (empty($description)) $errors[] = "Job description is required";
 
 if (!empty($errors)) {
@@ -32,6 +34,8 @@ if (!empty($errors)) {
     header("Location: alumni-job.php");
     exit;
 }
+
+$combined_location = $location . ' (' . $modality . ')';
 
 $check_query = "SELECT * FROM careers WHERE id = ? AND user_id = ?";
 $check_stmt = $conn->prepare($check_query);
@@ -47,7 +51,7 @@ if ($result->num_rows === 0) {
 
 $update_query = "UPDATE careers SET job_title = ?, company = ?, location = ?, description = ? WHERE id = ? AND user_id = ?";
 $update_stmt = $conn->prepare($update_query);
-$update_stmt->bind_param("ssssis", $job_title, $company, $location, $description, $job_id, $user_id);
+$update_stmt->bind_param("ssssis", $job_title, $company, $combined_location, $description, $job_id, $user_id);
 
 if ($update_stmt->execute()) {
     $_SESSION['success'] = "Job listing updated successfully";

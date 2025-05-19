@@ -8,6 +8,10 @@ $email = "";
 $contact = "";
 $aboutContent = "";
 $coverImg = "";
+$facebook = "";
+$twitter = "";
+$instagram = "";
+$linkedin = "";
 $msg = "";
 $msgClass = "";
 
@@ -20,6 +24,10 @@ if($result->num_rows > 0) {
     $contact = $settings['contact'];
     $aboutContent = $settings['about_content'];
     $coverImg = $settings['cover_img'];
+    $facebook = isset($settings['facebook']) ? $settings['facebook'] : '';
+    $twitter = isset($settings['twitter']) ? $settings['twitter'] : '';
+    $instagram = isset($settings['instagram']) ? $settings['instagram'] : '';
+    $linkedin = isset($settings['linkedin']) ? $settings['linkedin'] : '';
 }
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -27,6 +35,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $conn->real_escape_string($_POST['email']);
     $contact = $conn->real_escape_string($_POST['contact']);
     $aboutContent = $conn->real_escape_string($_POST['aboutContent']);
+    $facebook = $conn->real_escape_string($_POST['facebook']);
+    $twitter = $conn->real_escape_string($_POST['twitter']);
+    $instagram = $conn->real_escape_string($_POST['instagram']);
+    $linkedin = $conn->real_escape_string($_POST['linkedin']);
     
     $upload_path = "";
     if(isset($_FILES['imageUpload']) && $_FILES['imageUpload']['error'] == 0) {
@@ -67,15 +79,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     if(empty($msg)) {
         $sql = "";
         if($result->num_rows > 0) {
-            $sql = "UPDATE system_settings SET name = '$systemName', email = '$email', contact = '$contact', about_content = '$aboutContent'";
+            $sql = "UPDATE system_settings SET name = '$systemName', email = '$email', contact = '$contact', 
+                    about_content = '$aboutContent', facebook = '$facebook', twitter = '$twitter', 
+                    instagram = '$instagram', linkedin = '$linkedin'";
             if(!empty($upload_path)) {
                 $sql .= ", cover_img = '$upload_path'";
             }
             $sql .= " WHERE id = " . $settings['id'];
         } else {
             $cover_img_val = !empty($upload_path) ? "'$upload_path'" : "''";
-            $sql = "INSERT INTO system_settings (name, email, contact, about_content, cover_img) VALUES 
-                    ('$systemName', '$email', '$contact', '$aboutContent', $cover_img_val)";
+            $sql = "INSERT INTO system_settings (name, email, contact, about_content, cover_img, facebook, twitter, instagram, linkedin) VALUES 
+                    ('$systemName', '$email', '$contact', '$aboutContent', $cover_img_val, '$facebook', '$twitter', '$instagram', '$linkedin')";
         }
         
         if($conn->query($sql)) {
@@ -125,6 +139,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
             <a href="admin-event.php"><img src="images/calendar.png" alt="Events"><span>Events</span></a>
             <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
+            <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
             <a href="admin-system-setting.php" class="active"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
             <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
         </div>
@@ -161,6 +176,28 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="form-group">
                     <label for="aboutContent">About Content</label>
                     <textarea id="aboutContent" name="aboutContent" rows="8"><?php echo htmlspecialchars($aboutContent); ?></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Social Media Links</label>
+                    <div class="social-links">
+                        <div class="social-input">
+                            <span class="social-icon">FB</span>
+                            <input type="url" id="facebook" name="facebook" placeholder="Facebook URL" value="<?php echo htmlspecialchars($facebook); ?>">
+                        </div>
+                        <div class="social-input">
+                            <span class="social-icon">TW</span>
+                            <input type="url" id="twitter" name="twitter" placeholder="Twitter URL" value="<?php echo htmlspecialchars($twitter); ?>">
+                        </div>
+                        <div class="social-input">
+                            <span class="social-icon">IG</span>
+                            <input type="url" id="instagram" name="instagram" placeholder="Instagram URL" value="<?php echo htmlspecialchars($instagram); ?>">
+                        </div>
+                        <div class="social-input">
+                            <span class="social-icon">LI</span>
+                            <input type="url" id="linkedin" name="linkedin" placeholder="LinkedIn URL" value="<?php echo htmlspecialchars($linkedin); ?>">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-row media-upload">

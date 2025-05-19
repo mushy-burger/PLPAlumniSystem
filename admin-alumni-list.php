@@ -3,7 +3,7 @@ session_start();
 include 'admin/db_connect.php';
 
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-$items_per_page = 10;
+$items_per_page = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $offset = ($page - 1) * $items_per_page;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -153,7 +153,7 @@ function build_query_params($exclude = []) {
                 <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
                 <a href="admin-event.php"><img src="images/calendar.png" alt="Events"><span>Events</span></a>
                 <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-                <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+                <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
                 <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
                 <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
             </div>
@@ -176,11 +176,12 @@ function build_query_params($exclude = []) {
             <?php endif; ?>
             
             <div class="filter-container">
-                <button id="toggle-filters" class="toggle-filters-btn">Show Filters</button>
-                
-                <a href="export_alumni_pdf.php?<?php echo build_query_params([]); ?>" target="_blank" class="export-pdf-btn">
-                    <i class="fas fa-file-pdf"></i> Export to PDF
-                </a>
+                <div class="filter-header">
+                    <button id="toggle-filters" class="toggle-filters-btn">Show Filters</button>
+                    <a href="export_alumni_pdf.php?<?php echo build_query_params([]); ?>" target="_blank" class="export-pdf-btn">
+                        <i class="fas fa-file-pdf"></i> Export to PDF
+                    </a>
+                </div>
                 
                 <div id="filter-panel" class="filter-panel">
                     <form method="GET" action="" id="filter-form">
@@ -273,7 +274,7 @@ function build_query_params($exclude = []) {
                 </div>
                 <?php endif; ?>
             </div>
-
+            
             <div class="table-alist">
                 <table>
                     <tr>
@@ -334,31 +335,21 @@ function build_query_params($exclude = []) {
 
             <div class="list-foot">
                 <div class="pagination-info">
-                    <span>Page <?php echo $page; ?> of <?php echo max(1, $total_pages); ?></span>
-                    <span>Showing <?php echo min($total_records, $items_per_page); ?> of <?php echo $total_records; ?> entries</span>
                     <?php if (count($filter_conditions) > 0): ?>
                     <span class="filter-notice">Filtered results</span>
                     <?php endif; ?>
                 </div>
                 <div class="pagination">
-                    <?php if($page > 1): ?>
-                        <a href="?page=1&<?php echo build_query_params(['page']); ?>" class="page-link">First</a>
-                        <a href="?page=<?php echo $page-1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Previous</a>
-                    <?php endif; ?>
+                    <button <?php echo $page <= 1 ? 'disabled' : ''; ?> 
+                            onclick="changePage(<?php echo $page - 1; ?>)">Previous</button>
                     
-                    <?php
-                    $start_page = max(1, $page - 2);
-                    $end_page = min(max(1, $total_pages), $start_page + 4);
-                    
-                    for($i = $start_page; $i <= $end_page; $i++):
-                    ?>
-                        <a href="?page=<?php echo $i; ?>&<?php echo build_query_params(['page']); ?>" class="page-link <?php echo ($i == $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <button <?php echo $i == $page ? 'class="active"' : ''; ?> 
+                                onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
                     <?php endfor; ?>
                     
-                    <?php if($page < $total_pages): ?>
-                        <a href="?page=<?php echo $page+1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Next</a>
-                        <a href="?page=<?php echo $total_pages; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Last</a>
-                    <?php endif; ?>
+                    <button <?php echo $page >= $total_pages ? 'disabled' : ''; ?> 
+                            onclick="changePage(<?php echo $page + 1; ?>)">Next</button>
                 </div>
             </div>
         </div>
@@ -370,6 +361,19 @@ function build_query_params($exclude = []) {
             sidebar.classList.toggle('collapsed');
             const toggleBtn = document.querySelector('.toggle-btn');
             toggleBtn.innerHTML = sidebar.classList.contains('collapsed') ? '&#x25B6;' : '&#x25C0;';
+        }
+
+        function changePage(page) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('page', page);
+            window.location.href = currentUrl.toString();
+        }
+        
+        function changeEntriesPerPage(limit) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('limit', limit);
+            currentUrl.searchParams.delete('page'); 
+            window.location.href = currentUrl.toString();
         }
         
         function confirmDelete(id) {

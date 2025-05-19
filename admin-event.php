@@ -2,15 +2,99 @@
 session_start();
 include 'admin/db_connect.php';
 
+$check_archive_table = $conn->query("SHOW TABLES LIKE 'archived_events'");
+if ($check_archive_table->num_rows == 0) {
+    $create_archive_table = "CREATE TABLE archived_events (
+        id INT(11) AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        schedule DATETIME NOT NULL,
+        banner VARCHAR(255) NOT NULL DEFAULT 'no-image.jpg',
+        gform_link VARCHAR(255),
+        archived_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        original_id INT(11)
+    )";
+    
+    if (!$conn->query($create_archive_table)) {
+        $_SESSION['error'] = "Error creating archived events table: " . $conn->error;
+    }
+}
+
+$check_archive_date = $conn->query("SHOW COLUMNS FROM events LIKE 'archive_date'");
+if ($check_archive_date->num_rows == 0) {
+    $add_archive_date = "ALTER TABLE events ADD COLUMN archive_date DATETIME NULL";
+    
+    if (!$conn->query($add_archive_date)) {
+        $_SESSION['error'] = "Error adding archive_date column: " . $conn->error;
+    }
+}
+
+$current_date = date('Y-m-d H:i:s');
+$get_expired = $conn->query("SELECT * FROM events WHERE archive_date IS NOT NULL AND archive_date <= '$current_date'");
+
+if ($get_expired && $get_expired->num_rows > 0) {
+    while ($row = $get_expired->fetch_assoc()) {
+        $event_id = $row['id'];
+        $title = $conn->real_escape_string($row['title']);
+        $content = $conn->real_escape_string($row['content']);
+        $schedule = $row['schedule'];
+        $banner = $row['banner'];
+        $gform_link = $conn->real_escape_string($row['gform_link'] ?? '');
+        
+        $insert_archive = "INSERT INTO archived_events (title, content, schedule, banner, gform_link, original_id) 
+                           VALUES ('$title', '$content', '$schedule', '$banner', '$gform_link', $event_id)";
+        
+        if ($conn->query($insert_archive)) {
+            $conn->query("DELETE FROM events WHERE id = $event_id");
+        }
+    }
+}
+
 if (isset($_POST['action'])) {
     $action = $_POST['action'];
     $title = $conn->real_escape_string($_POST['title']);
     $content = $conn->real_escape_string($_POST['content']);
     $schedule = $conn->real_escape_string($_POST['schedule']);
     $gform_link = $conn->real_escape_string($_POST['gform_link']);
-    $banner_img = "";
+    $archive_date = !empty($_POST['archive_date']) ? "'".$conn->real_escape_string($_POST['archive_date'])."'" : "NULL";
+
+    if ($action == 'edit_no_image') {
+        $event_id = intval($_POST['event_id']);
+        
+        $sql = "UPDATE events SET 
+                title='$title', 
+                content='$content', 
+                schedule='$schedule', 
+                gform_link='$gform_link', 
+                archive_date=$archive_date 
+                WHERE id=$event_id";
+        
+        if ($conn->query($sql)) {
+            $_SESSION['success'] = "Event updated successfully!";
+        } else {
+            $_SESSION['error'] = "Error updating event: " . $conn->error;
+        }
+        
+        header("Location: admin-event.php");
+        exit();
+    }
     
-    if(isset($_FILES['banner']) && $_FILES['banner']['error'] == 0){
+    $banner_img = "";
+    $upload_new_banner = false;
+    $keep_existing = isset($_POST['keep_existing_banner']) && $_POST['keep_existing_banner'] == '1';
+    
+    $file_info = '';
+    if(isset($_FILES['banner'])) {
+        $file_info = "File error code: " . $_FILES['banner']['error'] . 
+                   ", File name: " . $_FILES['banner']['name'] . 
+                   ", File size: " . $_FILES['banner']['size'] . 
+                   ", Keep existing: " . ($keep_existing ? 'yes' : 'no');
+    }
+    
+    if(isset($_FILES['banner']) && $_FILES['banner']['error'] === 0 && !empty($_FILES['banner']['name'])) {
+        $upload_new_banner = true;
+        $keep_existing = false;
+        
         $allowed = array('jpg' => 'image/jpg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif');
         $filename = $_FILES['banner']['name'];
         $filetype = $_FILES['banner']['type'];
@@ -18,14 +102,14 @@ if (isset($_POST['action'])) {
         
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
         if(!array_key_exists($ext, $allowed)) {
-            $_SESSION['error'] = "Error: Please select a valid image format.";
+            $_SESSION['error'] = "Error: Please select a valid image format. Debug: $file_info";
             header("Location: admin-event.php");
             exit();
         }
         
         $maxsize = 5 * 1024 * 1024;
         if($filesize > $maxsize) {
-            $_SESSION['error'] = "Error: File size is larger than the allowed limit (5MB).";
+            $_SESSION['error'] = "Error: File size is larger than the allowed limit (5MB). Debug: $file_info";
             header("Location: admin-event.php");
             exit();
         }
@@ -36,21 +120,25 @@ if (isset($_POST['action'])) {
             if(move_uploaded_file($_FILES['banner']['tmp_name'], 'uploads/events/'.$new_filename)){
                 $banner_img = 'uploads/events/' . $new_filename;
             } else {
-                $_SESSION['error'] = "Error uploading file.";
+                $_SESSION['error'] = "Error uploading file. Debug: $file_info";
                 header("Location: admin-event.php");
                 exit();
             }
         } else {
-            $_SESSION['error'] = "Error: Please select a valid image format.";
+            $_SESSION['error'] = "Error: Please select a valid image format. Debug: $file_info";
             header("Location: admin-event.php");
             exit();
         }
+    } else if (isset($_FILES['banner']) && $_FILES['banner']['error'] !== 0 && $_FILES['banner']['error'] !== 4) {
+        $_SESSION['error'] = "File upload error occurred. Error code: " . $_FILES['banner']['error'] . ". Debug: $file_info";
+        header("Location: admin-event.php");
+        exit();
     }
     
     if ($action == 'add') {
-        $banner_sql = $banner_img ? "'$banner_img'" : "'no-image-available.png'";
-        $sql = "INSERT INTO events (title, content, schedule, banner, gform_link) 
-                VALUES ('$title', '$content', '$schedule', $banner_sql, '$gform_link')";
+        $banner_sql = $upload_new_banner ? "'$banner_img'" : "'no-image.jpg'";
+        $sql = "INSERT INTO events (title, content, schedule, banner, gform_link, archive_date) 
+                VALUES ('$title', '$content', '$schedule', $banner_sql, '$gform_link', $archive_date)";
         
         if ($conn->query($sql)) {
             $_SESSION['success'] = "Event added successfully!";
@@ -60,17 +148,19 @@ if (isset($_POST['action'])) {
     } elseif ($action == 'edit') {
         $event_id = intval($_POST['event_id']);
         
-        if($banner_img) {
+        if($upload_new_banner) {
             $curr_banner = $conn->query("SELECT banner FROM events WHERE id='$event_id'")->fetch_assoc()['banner'];
-            if($curr_banner != 'no-image-available.png' && file_exists($curr_banner)) {
+            if($curr_banner != 'no-image.jpg' && file_exists($curr_banner)) {
                 unlink($curr_banner);
             }
             
             $sql = "UPDATE events SET title='$title', content='$content', 
-                    schedule='$schedule', banner='$banner_img', gform_link='$gform_link' WHERE id=$event_id";
+                    schedule='$schedule', banner='$banner_img', gform_link='$gform_link', archive_date=$archive_date 
+                    WHERE id=$event_id";
         } else {
             $sql = "UPDATE events SET title='$title', content='$content', 
-                    schedule='$schedule', gform_link='$gform_link' WHERE id=$event_id";
+                    schedule='$schedule', gform_link='$gform_link', archive_date=$archive_date 
+                    WHERE id=$event_id";
         }
         
         if ($conn->query($sql)) {
@@ -92,7 +182,7 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     if ($check_result && $check_result->num_rows > 0) {
         $event_data = $check_result->fetch_assoc();
         
-        if($event_data['banner'] != 'no-image-available.png' && file_exists($event_data['banner'])) {
+        if($event_data['banner'] != 'no-image.jpg' && file_exists($event_data['banner'])) {
             unlink($event_data['banner']);
         }
         
@@ -121,10 +211,13 @@ if (!empty($search)) {
     $search_condition = " WHERE title LIKE '%$search%' OR content LIKE '%$search%'";
 }
 
-$sql = "SELECT * FROM events $search_condition ORDER BY schedule DESC LIMIT $offset, $items_per_page";
+$view_archived = isset($_GET['view']) && $_GET['view'] == 'archived';
+$table_name = $view_archived ? 'archived_events' : 'events';
+
+$sql = "SELECT * FROM $table_name $search_condition ORDER BY " . ($view_archived ? "archived_date" : "schedule") . " DESC LIMIT $offset, $items_per_page";
 $result = $conn->query($sql);
 
-$total_sql = "SELECT COUNT(*) as total FROM events $search_condition";
+$total_sql = "SELECT COUNT(*) as total FROM $table_name $search_condition";
 $total_result = $conn->query($total_sql);
 $total_row = $total_result->fetch_assoc();
 $total_records = $total_row['total'];
@@ -151,6 +244,7 @@ if (!file_exists('uploads/events')) {
   <title>Admin Events</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="css/admin-event.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
 <div class="interface-header">
@@ -180,7 +274,7 @@ if (!file_exists('uploads/events')) {
           <a href="admin-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
           <a href="admin-event.php" class="active"> <img src="images/calendar.png" alt="Events"><span>Events</span></a>
           <a href="admin-forums.php"><img src="images/forums.png" alt="Forum"><span>Forum</span></a>
-          <a href="admin-officers.php"><img src="images/officer.png" alt="Officers"><span>Officers</span></a>
+          <a href="admin-officers.php"><img src="images/users.png" alt="Officers"><span>Officers</span></a>
           <a href="admin-system-setting.php"><img src="images/settings.png" alt="System Settings"><span>System Settings</span></a>
           <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
       </div>
@@ -209,37 +303,43 @@ if (!file_exists('uploads/events')) {
               </div>
           <?php endif; ?>
           
+          <div class="event-tabs">
+              <button class="tab-btn <?php echo !isset($_GET['view']) || $_GET['view'] != 'archived' ? 'active' : ''; ?>" onclick="location.href='admin-event.php'">Active Events</button>
+              <button class="tab-btn <?php echo isset($_GET['view']) && $_GET['view'] == 'archived' ? 'active' : ''; ?>" onclick="location.href='admin-event.php?view=archived'">Archived Events</button>
+          </div>
+          
           <div class="top-actions">
               <div class="left-controls">
                   <div class="entries-search-wrapper">
                       <form method="GET" action="admin-event.php" class="search-form">
-                          <div class="entries-control">
-                              <span>Show</span>
-                              <select name="limit" onchange="this.form.submit()">
-                                  <option value="10" <?php echo $items_per_page == 10 ? 'selected' : ''; ?>>10</option>
-                                  <option value="25" <?php echo $items_per_page == 25 ? 'selected' : ''; ?>>25</option>
-                                  <option value="50" <?php echo $items_per_page == 50 ? 'selected' : ''; ?>>50</option>
-                              </select>
-                              <span>Entries</span>
-                          </div>
-                          <div class="search-control">
-                              <span>Search:</span>
-                              <input type="text" name="search" class="search-input" value="<?php echo htmlspecialchars($search); ?>" placeholder="Event title, description...">
-                              <button type="submit" class="alist-filter">Filter</button>
-                          </div>
+                          <?php if ($view_archived): ?>
+                          <input type="hidden" name="view" value="archived">
+                          <?php endif; ?>
+                          <span>Show</span>
+                          <select name="limit" onchange="this.form.submit()">
+                              <option value="10" <?php echo $items_per_page == 10 ? 'selected' : ''; ?>>10</option>
+                              <option value="25" <?php echo $items_per_page == 25 ? 'selected' : ''; ?>>25</option>
+                              <option value="50" <?php echo $items_per_page == 50 ? 'selected' : ''; ?>>50</option>
+                          </select>
+                          <span>Entries</span>
+                          <span class="search-label">Search:</span>
+                          <input type="text" name="search" class="search-input" value="<?php echo htmlspecialchars($search); ?>" placeholder="Event title, description...">
+                          <button type="submit" class="alist-filter">Filter</button>
                       </form>
                   </div>
               </div>
 
               <div class="right-controls">
+                  <?php if (!$view_archived): ?>
                   <button class="new-button" id="openAddModal">+ New Event</button>
+                  <?php endif; ?>
               </div>
           </div>
 
           <div class="event-stats">
               <div class="stat-box">
                   <span class="stat-number"><?php echo $total_records; ?></span>
-                  <span class="stat-label">Total Events</span>
+                  <span class="stat-label"><?php echo $view_archived ? 'Archived Events' : 'Active Events'; ?></span>
               </div>
               <?php if (!empty($search)): ?>
               <div class="stat-box filtered">
@@ -257,6 +357,9 @@ if (!file_exists('uploads/events')) {
                           <th>Banner</th>
                           <th>Title</th>
                           <th>Schedule</th>
+                          <?php if ($view_archived): ?>
+                          <th>Archived Date</th>
+                          <?php endif; ?>
                           <th>Description</th>
                           <th>Google Form</th>
                           <th>Action</th>
@@ -271,7 +374,7 @@ if (!file_exists('uploads/events')) {
                               $short_content = strlen($content) > 100 ? substr($content, 0, 100) . '...' : $content;
                               $banner_path = $row['banner'];
                               if(!file_exists($banner_path) || empty($banner_path)) {
-                                  $banner_path = "images/no-image-available.png";
+                                  $banner_path = "images/no-image.jpg";
                               }
                       ?>
                       <tr>
@@ -283,6 +386,11 @@ if (!file_exists('uploads/events')) {
                           <td class="event-date">
                               <?php echo date('M d, Y h:i A', strtotime($row['schedule'])); ?>
                           </td>
+                          <?php if ($view_archived): ?>
+                          <td class="event-date">
+                              <?php echo date('M d, Y h:i A', strtotime($row['archived_date'])); ?>
+                          </td>
+                          <?php endif; ?>
                           <td class="event-description"><?php echo htmlspecialchars($short_content); ?></td>
                           <td class="event-gform">
                               <?php if(!empty($row['gform_link'])): ?>
@@ -300,15 +408,24 @@ if (!file_exists('uploads/events')) {
                                       data-schedule="<?php echo $row['schedule']; ?>"
                                       data-banner="<?php echo $banner_path; ?>"
                                       data-gform="<?php echo htmlspecialchars($row['gform_link'] ?? ''); ?>"
-                                      onclick="viewEvent(this)">View</button>
+                                      <?php if (!$view_archived): ?>
+                                      data-archive-date="<?php echo htmlspecialchars($row['archive_date'] ?? ''); ?>"
+                                      <?php else: ?>
+                                      data-archived-date="<?php echo htmlspecialchars($row['archived_date']); ?>"
+                                      <?php endif; ?>
+                                      onclick="<?php echo $view_archived ? 'viewArchivedEvent(this)' : 'viewEvent(this)'; ?>">View</button>
+                              
+                              <?php if (!$view_archived): ?>
                               <button class="edit-btn" data-id="<?php echo $row['id']; ?>"
                                       data-title="<?php echo htmlspecialchars($row['title']); ?>"
                                       data-content="<?php echo htmlspecialchars($row['content']); ?>"
                                       data-schedule="<?php echo $row['schedule']; ?>"
                                       data-banner="<?php echo $banner_path; ?>"
                                       data-gform="<?php echo htmlspecialchars($row['gform_link'] ?? ''); ?>"
+                                      data-archive-date="<?php echo htmlspecialchars($row['archive_date'] ?? ''); ?>"
                                       onclick="editEvent(this)">Edit</button>
                               <button class="delete-btn" onclick="confirmDelete(<?php echo $row['id']; ?>)">Delete</button>
+                              <?php endif; ?>
                           </td>
                       </tr>
                       <?php 
@@ -316,7 +433,9 @@ if (!file_exists('uploads/events')) {
                       else:
                       ?>
                       <tr>
-                          <td colspan="7" style="text-align: center;">No events found</td>
+                          <td colspan="<?php echo $view_archived ? '8' : '7'; ?>" style="text-align: center;">
+                              <?php echo $view_archived ? 'No archived events found' : 'No events found'; ?>
+                          </td>
                       </tr>
                       <?php endif; ?>
                   </tbody>
@@ -325,32 +444,21 @@ if (!file_exists('uploads/events')) {
 
           <div class="list-foot">
               <div class="pagination-info">
-                  <span>Page <?php echo $page; ?> of <?php echo max(1, $total_pages); ?></span>
-                  <span>Showing <?php echo min($total_records, $items_per_page); ?> of <?php echo $total_records; ?> entries</span>
                   <?php if (!empty($search)): ?>
                   <span class="filter-notice">Filtered results</span>
                   <?php endif; ?>
               </div>
               <div class="pagination">
-                  <?php if($page > 1): ?>
-                      <a href="?page=1&<?php echo build_query_params(['page']); ?>" class="page-link">First</a>
-                      <a href="?page=<?php echo $page-1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Previous</a>
-                  <?php endif; ?>
+                  <button <?php echo $page <= 1 ? 'disabled' : ''; ?> 
+                          onclick="changePage(<?php echo $page - 1; ?>)">Previous</button>
                   
-                  <?php
-                  $start_page = max(1, $page - 2);
-                  $end_page = min($total_pages, $page + 2);
-                  
-                  for($i = $start_page; $i <= $end_page; $i++):
-                  ?>
-                      <a href="?page=<?php echo $i; ?>&<?php echo build_query_params(['page']); ?>" 
-                         class="page-link <?php echo $i == $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                  <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                      <button <?php echo $i == $page ? 'class="active"' : ''; ?> 
+                              onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
                   <?php endfor; ?>
                   
-                  <?php if($page < $total_pages): ?>
-                      <a href="?page=<?php echo $page+1; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Next</a>
-                      <a href="?page=<?php echo $total_pages; ?>&<?php echo build_query_params(['page']); ?>" class="page-link">Last</a>
-                  <?php endif; ?>
+                  <button <?php echo $page >= $total_pages ? 'disabled' : ''; ?> 
+                          onclick="changePage(<?php echo $page + 1; ?>)">Next</button>
               </div>
           </div>
       </div>
@@ -358,17 +466,55 @@ if (!file_exists('uploads/events')) {
 
   <div class="event-modal" id="viewEventModal">
       <div class="event-modal-content">
-          <h2>Event Details</h2>
+          <div class="modal-header">
+              <h2 id="viewModalTitle"></h2>
+              <span class="close-modal" id="closeViewModal">&times;</span>
+          </div>
+          
           <div class="event-banner-container">
               <img id="modalBanner" src="" alt="Event Banner">
           </div>
-          <p><strong>Title:</strong> <span id="modalTitle"></span></p>
-          <p><strong>Schedule:</strong> <span id="modalSchedule"></span></p>
-          <div id="modalGform"></div>
-          <hr>
-          <h3>Description:</h3>
-          <div id="modalContent"></div>
-          <button class="close-job-modal" id="closeViewModal">Close</button>
+          
+          <div class="event-details">
+              <div class="detail-row">
+                  <div class="detail-icon">
+                      <i class="fas fa-calendar-alt"></i>
+                  </div>
+                  <div class="detail-content">
+                      <h4>Schedule</h4>
+                      <p id="modalSchedule"></p>
+                  </div>
+              </div>
+              
+              <div class="detail-row" id="archiveDateContainer" style="display: none;">
+                  <div class="detail-icon">
+                      <i class="fas fa-archive"></i>
+                  </div>
+                  <div class="detail-content">
+                      <h4>Auto-Archive Date</h4>
+                      <p id="modalArchiveDate"></p>
+                  </div>
+              </div>
+              
+              <div class="detail-row" id="gformContainer">
+                  <div class="detail-icon">
+                      <i class="fas fa-link"></i>
+                  </div>
+                  <div class="detail-content" id="modalGform">
+                      <h4>Registration</h4>
+                  </div>
+              </div>
+              
+              <div class="detail-row">
+                  <div class="detail-icon">
+                      <i class="fas fa-align-left"></i>
+                  </div>
+                  <div class="detail-content">
+                      <h4>Description</h4>
+                      <div class="event-description-content" id="modalContent"></div>
+                  </div>
+              </div>
+          </div>
       </div>
   </div>
 
@@ -378,21 +524,29 @@ if (!file_exists('uploads/events')) {
           <form id="editEventForm" method="POST" action="admin-event.php" enctype="multipart/form-data">
               <input type="hidden" id="editEventId" name="event_id">
               <input type="hidden" name="action" value="edit">
-
+              <input type="hidden" name="keep_existing_banner" value="1">
+              
               <label for="editTitle">Title</label>
               <input type="text" id="editTitle" name="title" class="edit-input" required>
 
               <label for="editSchedule">Schedule (Date and Time)</label>
               <input type="datetime-local" id="editSchedule" name="schedule" class="date-input" required>
               
-              <label for="editBanner">Banner Image</label>
+              <label for="editArchiveDate">Auto-Archive Date and Time <small>(event will be moved to archive after this date/time)</small></label>
+              <input type="datetime-local" id="editArchiveDate" name="archive_date" class="date-input">
+              
+              <label for="editBanner">Banner Image <small>(Optional)</small></label>
               <div class="form-group">
                   <input type="file" id="editBanner" name="banner" class="file-input" accept="image/jpeg, image/png">
                   <div class="banner-preview">
                       <img id="currentBanner" src="#" style="max-width: 100%; max-height: 200px;">
                   </div>
+                  <div class="keep-existing">
+                      <input type="checkbox" id="keepExistingCheckbox" checked disabled>
+                      <label for="keepExistingCheckbox" class="checkbox-label">Keep existing image if no new file is selected</label>
+                  </div>
               </div>
-              <small>Leave empty to keep current image</small>
+              <small class="note-text">Leave empty to keep current image</small>
               
               <label for="editGformLink">Google Form Link (Optional)</label>
               <input type="url" id="editGformLink" name="gform_link" class="edit-input" placeholder="https://forms.google.com/...">
@@ -401,9 +555,20 @@ if (!file_exists('uploads/events')) {
               <textarea id="editContent" name="content" class="edit-textarea" required></textarea>
 
               <div class="modal-buttons">
-                  <button type="submit">Save</button>
+                  <button type="submit">Save with New Image</button>
+                  <button type="button" id="saveWithoutImageBtn" class="save-no-image-btn">Save without Changing Image</button>
                   <button type="button" id="cancelEditBtn" class="cancel-btn">Cancel</button>
               </div>
+          </form>
+          
+          <form id="editEventNoImageForm" method="POST" action="admin-event.php" style="display: none;">
+              <input type="hidden" id="editEventIdNoImage" name="event_id">
+              <input type="hidden" name="action" value="edit_no_image">
+              <input type="hidden" id="editTitleNoImage" name="title">
+              <input type="hidden" id="editScheduleNoImage" name="schedule">
+              <input type="hidden" id="editArchiveDateNoImage" name="archive_date">
+              <input type="hidden" id="editGformLinkNoImage" name="gform_link">
+              <input type="hidden" id="editContentNoImage" name="content">
           </form>
       </div>
   </div>
@@ -420,11 +585,14 @@ if (!file_exists('uploads/events')) {
               <label for="addSchedule">Schedule (Date and Time)</label>
               <input type="datetime-local" id="addSchedule" name="schedule" class="date-input" required>
               
+              <label for="addArchiveDate">Auto-Archive Date and Time <small>(event will be moved to archive after this date/time)</small></label>
+              <input type="datetime-local" id="addArchiveDate" name="archive_date" class="date-input">
+              
               <label for="addBanner">Banner Image</label>
               <div class="form-group">
                   <input type="file" id="addBanner" name="banner" class="file-input" accept="image/jpeg, image/png">
                   <div class="banner-preview">
-                      <img id="newBannerPreview" src="#" style="display: none; max-width: 100%; max-height: 200px;">
+                      <img id="newBannerPreview" src="images/no-image.jpg" style="display: none; max-width: 100%; max-height: 200px;">
                   </div>
               </div>
               
@@ -461,6 +629,91 @@ if (!file_exists('uploads/events')) {
           toggleBtn.innerHTML = sidebar.classList.contains('collapsed') ? '&#x25B6;' : '&#x25C0;';
       }
 
+      document.addEventListener('DOMContentLoaded', function() {
+          const editForm = document.getElementById('editEventForm');
+          const fileInput = document.getElementById('editBanner');
+          const keepExistingField = document.querySelector('input[name="keep_existing_banner"]');
+          
+          fileInput.addEventListener('change', function() {
+              if(fileInput.files && fileInput.files.length > 0) {
+                  keepExistingField.value = '0';
+              } else {
+                  keepExistingField.value = '1';
+              }
+          });
+          
+          document.getElementById('saveWithoutImageBtn').addEventListener('click', function() {
+              const eventId = document.getElementById('editEventId').value;
+              const title = document.getElementById('editTitle').value;
+              const schedule = document.getElementById('editSchedule').value;
+              const archiveDate = document.getElementById('editArchiveDate').value;
+              const gformLink = document.getElementById('editGformLink').value;
+              const content = document.getElementById('editContent').value;
+              
+              if (!title || !schedule || !content) {
+                  alert('Please fill in all required fields');
+                  return;
+              }
+              
+              document.getElementById('editEventIdNoImage').value = eventId;
+              document.getElementById('editTitleNoImage').value = title;
+              document.getElementById('editScheduleNoImage').value = schedule;
+              document.getElementById('editArchiveDateNoImage').value = archiveDate;
+              document.getElementById('editGformLinkNoImage').value = gformLink;
+              document.getElementById('editContentNoImage').value = content;
+              
+              document.getElementById('editEventNoImageForm').submit();
+          });
+          
+          editForm.addEventListener('submit', function(e) {
+              console.log('Form is being submitted');
+              
+              if(fileInput.files && fileInput.files.length > 0) {
+                  console.log('File selected:', fileInput.files[0].name);
+                  console.log('Keep existing:', keepExistingField.value);
+              } else {
+                  console.log('No file selected');
+                  console.log('Keep existing:', keepExistingField.value);
+              }
+              
+              return true;
+          });
+      });
+
+      function setMinDateTime() {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const day = String(now.getDate()).padStart(2, '0');
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          
+          const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+          const minDate = `${year}-${month}-${day}`;
+          
+          document.getElementById('addSchedule').min = minDateTime;
+          document.getElementById('addArchiveDate').min = minDateTime;
+          
+          const editScheduleInput = document.getElementById('editSchedule');
+          const editArchiveDateInput = document.getElementById('editArchiveDate');
+          
+          if(editScheduleInput) {
+              editScheduleInput.addEventListener('focus', function() {
+                  if(!this.value || new Date(this.value) > now) {
+                      this.min = minDateTime;
+                  }
+              });
+          }
+          
+          if(editArchiveDateInput) {
+              editArchiveDateInput.addEventListener('focus', function() {
+                  this.min = minDate;
+              });
+          }
+      }
+      
+      document.addEventListener('DOMContentLoaded', setMinDateTime);
+
       const viewModal = document.getElementById("viewEventModal");
       const editModal = document.getElementById("editEventModal");
       const addModal = document.getElementById("addEventModal");
@@ -476,7 +729,19 @@ if (!file_exists('uploads/events')) {
       
       document.getElementById('openAddModal').addEventListener("click", () => {
           document.getElementById('addEventForm').reset();
-          document.getElementById('newBannerPreview').src = "images/no-image-available.png";
+          document.getElementById('newBannerPreview').src = "images/no-image.jpg";
+          
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const day = String(now.getDate()).padStart(2, '0');
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+          
+          document.getElementById('addSchedule').min = minDateTime;
+          document.getElementById('addArchiveDate').min = minDateTime;
+          
           addModal.style.display = "flex";
       });
       
@@ -492,7 +757,6 @@ if (!file_exists('uploads/events')) {
       
       document.getElementById('confirmDeleteBtn').addEventListener("click", () => {
           if(deleteId) {
-              // Proceed with the deletion regardless of Google Form link presence
               window.location.href = `admin-event.php?delete=${deleteId}`;
           }
       });
@@ -514,18 +778,45 @@ if (!file_exists('uploads/events')) {
           });
           const banner = btn.getAttribute('data-banner');
           const gform = btn.getAttribute('data-gform');
+          const archiveDate = btn.getAttribute('data-archive-date');
 
-          document.getElementById('modalTitle').textContent = title;
+          document.getElementById('viewModalTitle').textContent = title;
           document.getElementById('modalSchedule').textContent = schedule;
           document.getElementById('modalContent').innerHTML = content;
           document.getElementById('modalBanner').src = banner;
           
-          // Handle Google Form link
-          const gformContainer = document.getElementById('modalGform');
-          if (gform && gform.trim() !== '') {
-              gformContainer.innerHTML = `<p><strong>Google Form:</strong> <a href="${gform}" target="_blank" class="gform-link">Registration Form <i class="fas fa-external-link-alt"></i></a></p>`;
+          const archiveDateContainer = document.getElementById('archiveDateContainer');
+          if (archiveDate && archiveDate.trim() !== '') {
+              const formattedArchiveDate = new Date(archiveDate).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric'
+              });
+              document.getElementById('modalArchiveDate').textContent = formattedArchiveDate;
+              document.getElementById('archiveDateContainer').querySelector('h4').textContent = 'Auto-Archive Date';
+              archiveDateContainer.style.display = 'flex';
           } else {
-              gformContainer.innerHTML = `<p><strong>Google Form:</strong> <span class="no-link">No registration form available</span></p>`;
+              archiveDateContainer.style.display = 'none';
+          }
+          
+          const gformContainer = document.getElementById('gformContainer');
+          const gformContent = document.getElementById('modalGform');
+          if (gform && gform.trim() !== '') {
+              gformContent.innerHTML = `
+                <h4>Registration</h4>
+                <p>
+                  <a href="${gform}" target="_blank" class="gform-link">
+                    Registration Form <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </p>`;
+              gformContainer.style.display = 'flex';
+          } else {
+              gformContent.innerHTML = `
+                <h4>Registration</h4>
+                <p class="no-link">No registration form available</p>`;
+              gformContainer.style.display = 'flex';
           }
 
           viewModal.style.display = "flex";
@@ -538,9 +829,11 @@ if (!file_exists('uploads/events')) {
           const schedule = btn.getAttribute('data-schedule');
           const banner = btn.getAttribute('data-banner');
           const gform = btn.getAttribute('data-gform');
+          const archiveDate = btn.getAttribute('data-archive-date') || '';
           
           const dateObj = new Date(schedule);
           const formattedDate = dateObj.toISOString().slice(0, 16);
+          const now = new Date();
 
           document.getElementById('editEventId').value = id;
           document.getElementById('editTitle').value = title;
@@ -548,6 +841,35 @@ if (!file_exists('uploads/events')) {
           document.getElementById('editContent').value = content;
           document.getElementById('currentBanner').src = banner;
           document.getElementById('editGformLink').value = gform || '';
+          
+          if (archiveDate && archiveDate.trim() !== '') {
+              const archiveDateObj = new Date(archiveDate);
+              const formattedArchiveDate = archiveDateObj.toISOString().slice(0, 16);
+              document.getElementById('editArchiveDate').value = formattedArchiveDate;
+          } else {
+              document.getElementById('editArchiveDate').value = '';
+          }
+          
+          const editScheduleInput = document.getElementById('editSchedule');
+          if (dateObj > now) {
+              const year = now.getFullYear();
+              const month = String(now.getMonth() + 1).padStart(2, '0');
+              const day = String(now.getDate()).padStart(2, '0');
+              const hours = String(now.getHours()).padStart(2, '0');
+              const minutes = String(now.getMinutes()).padStart(2, '0');
+              const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+              editScheduleInput.min = minDateTime;
+              document.getElementById('editArchiveDate').min = minDateTime;
+          } else {
+              editScheduleInput.min = formattedDate;
+              const year = now.getFullYear();
+              const month = String(now.getMonth() + 1).padStart(2, '0');
+              const day = String(now.getDate()).padStart(2, '0');
+              const hours = String(now.getHours()).padStart(2, '0');
+              const minutes = String(now.getMinutes()).padStart(2, '0');
+              const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+              document.getElementById('editArchiveDate').min = minDateTime;
+          }
 
           editModal.style.display = "flex";
       }
@@ -600,6 +922,69 @@ if (!file_exists('uploads/events')) {
               }, 5000);
           });
       });
+
+      function changePage(page) {
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set('page', page);
+          window.location.href = currentUrl.toString();
+      }
+
+      function viewArchivedEvent(btn) {
+          const title = btn.getAttribute('data-title');
+          const content = btn.getAttribute('data-content');
+          const schedule = new Date(btn.getAttribute('data-schedule')).toLocaleString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric'
+          });
+          const banner = btn.getAttribute('data-banner');
+          const gform = btn.getAttribute('data-gform');
+          const archivedDate = btn.getAttribute('data-archived-date');
+
+          document.getElementById('viewModalTitle').textContent = title;
+          document.getElementById('modalSchedule').textContent = schedule;
+          document.getElementById('modalContent').innerHTML = content;
+          document.getElementById('modalBanner').src = banner;
+          
+          const archiveDateContainer = document.getElementById('archiveDateContainer');
+          if (archivedDate && archivedDate.trim() !== '') {
+              const formattedArchivedDate = new Date(archivedDate).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric'
+              });
+              document.getElementById('modalArchiveDate').textContent = formattedArchivedDate;
+              document.getElementById('archiveDateContainer').querySelector('h4').textContent = 'Archived On';
+              archiveDateContainer.style.display = 'flex';
+          } else {
+              archiveDateContainer.style.display = 'none';
+          }
+          
+          const gformContainer = document.getElementById('gformContainer');
+          const gformContent = document.getElementById('modalGform');
+          if (gform && gform.trim() !== '') {
+              gformContent.innerHTML = `
+                <h4>Registration</h4>
+                <p>
+                  <a href="${gform}" target="_blank" class="gform-link">
+                    Registration Form <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </p>`;
+              gformContainer.style.display = 'flex';
+          } else {
+              gformContent.innerHTML = `
+                <h4>Registration</h4>
+                <p class="no-link">No registration form available</p>`;
+              gformContainer.style.display = 'flex';
+          }
+
+          viewModal.style.display = "flex";
+      }
   </script>
 </body>
 </html>

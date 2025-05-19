@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $job_title = trim($_POST['job_title']);
 $company = trim($_POST['company']);
 $location = trim($_POST['location']);
+$modality = trim($_POST['modality'] ?? 'WFH');
 $description = trim($_POST['description']);
 $user_id = $_SESSION['login_id'];
 
@@ -23,6 +24,7 @@ $errors = [];
 if (empty($job_title)) $errors[] = "Job title is required";
 if (empty($company)) $errors[] = "Company name is required";
 if (empty($location)) $errors[] = "Job location is required";
+if (empty($modality)) $errors[] = "Work setup is required";
 if (empty($description)) $errors[] = "Job description is required";
 
 if (!empty($errors)) {
@@ -31,9 +33,11 @@ if (!empty($errors)) {
     exit;
 }
 
+$combined_location = $location . ' (' . $modality . ')';
+
 $query = "INSERT INTO careers (company, location, job_title, description, user_id) VALUES (?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("sssss", $company, $location, $job_title, $description, $user_id);
+$stmt->bind_param("sssss", $company, $combined_location, $job_title, $description, $user_id);
 
 if ($stmt->execute()) {
     $_SESSION['success'] = "Job opportunity posted successfully!";

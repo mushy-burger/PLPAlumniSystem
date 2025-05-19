@@ -121,28 +121,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_comment'])) {
     $comment_id = intval($_POST['comment_id']);
     $topic_id = intval($_POST['topic_id']);
-    
-    $verify_query = "SELECT * FROM forum_comments WHERE id = ? AND user_id = ?";
+
+    $verify_query = "SELECT fc.*, ft.user_id as topic_creator_id FROM forum_comments fc JOIN forum_topics ft ON fc.topic_id = ft.id WHERE fc.id = ?";
     $verify_stmt = $conn->prepare($verify_query);
-    $verify_stmt->bind_param("is", $comment_id, $alumni_id);  
-    
+    $verify_stmt->bind_param("i", $comment_id);
     $verify_stmt->execute();
     $verify_result = $verify_stmt->get_result();
-    
+
     if ($verify_result->num_rows > 0) {
-        $delete_query = "DELETE FROM forum_comments WHERE id = ?";
-        $delete_stmt = $conn->prepare($delete_query);
-        $delete_stmt->bind_param("i", $comment_id);
-        
-        if ($delete_stmt->execute()) {
-            $_SESSION['success'] = "Comment deleted successfully!";
+        $row = $verify_result->fetch_assoc();
+        if ($row['user_id'] == $alumni_id || $row['topic_creator_id'] == $alumni_id) {
+            $delete_query = "DELETE FROM forum_comments WHERE id = ?";
+            $delete_stmt = $conn->prepare($delete_query);
+            $delete_stmt->bind_param("i", $comment_id);
+
+            if ($delete_stmt->execute()) {
+                $_SESSION['success'] = "Comment deleted successfully!";
+            } else {
+                $_SESSION['error'] = "Error deleting comment: " . $conn->error;
+            }
         } else {
-            $_SESSION['error'] = "Error deleting comment: " . $conn->error;
+            $_SESSION['error'] = "You don't have permission to delete this comment.";
         }
     } else {
-        $_SESSION['error'] = "You don't have permission to delete this comment.";
+        $_SESSION['error'] = "Comment not found.";
     }
-    
+
     header("Location: alumni-forums.php?view_topic=" . $topic_id);
     exit;
 }
@@ -356,7 +360,7 @@ function build_query_params($exclude = []) {
                       <div class="comment-date"><?php echo date('M d, Y h:i A', strtotime($comment['date_created'])); ?></div>
                     </div>
                     <?php 
-                    if(strcmp($comment['user_id'], $alumni_id) === 0): 
+                    if(strcmp($comment['user_id'], $alumni_id) === 0 || ($topic_data && $topic_data['user_id'] == $alumni_id)):
                     ?>
                       <div class="comment-actions">
                         <button class="delete-comment-btn" onclick="confirmDeleteComment(<?php echo $comment['id']; ?>, <?php echo $view_topic; ?>)">
@@ -531,7 +535,7 @@ function build_query_params($exclude = []) {
       <p>Are you sure you want to delete this topic? This will also delete all comments and cannot be undone.</p>
       <div class="modal-buttons">
         <form method="POST" action="" id="delete-topic-form">
-          <input type="hidden" name="topic_id" id="delete-topic-id">
+          <input type="hidden" name="topic_id" id="delete-topic-id-topic-modal">
           <input type="hidden" name="delete_topic" value="1">
           <button type="button" class="btn-cancel" onclick="closeDeleteTopicModal()">Cancel</button>
           <button type="submit" class="btn-delete">Delete</button>
@@ -547,7 +551,7 @@ function build_query_params($exclude = []) {
       <div class="modal-buttons">
         <form method="POST" action="" id="delete-comment-form">
           <input type="hidden" name="comment_id" id="delete-comment-id">
-          <input type="hidden" name="topic_id" id="delete-topic-id">
+          <input type="hidden" name="topic_id" id="delete-topic-id-comment-modal">
           <input type="hidden" name="delete_comment" value="1">
           <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
           <button type="submit" class="btn-delete">Delete</button>
@@ -584,7 +588,7 @@ function build_query_params($exclude = []) {
     }
 
     function confirmDeleteTopic(topicId) {
-      document.getElementById('delete-topic-id').value = topicId;
+      document.getElementById('delete-topic-id-topic-modal').value = topicId;
       document.getElementById('delete-topic-modal').classList.add('show-modal');
     }
     
@@ -594,7 +598,7 @@ function build_query_params($exclude = []) {
 
     function confirmDeleteComment(commentId, topicId) {
       document.getElementById('delete-comment-id').value = commentId;
-      document.getElementById('delete-topic-id').value = topicId;
+      document.getElementById('delete-topic-id-comment-modal').value = topicId;
       document.getElementById('delete-comment-modal').classList.add('show-modal');
     }
     
