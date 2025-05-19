@@ -27,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $connected_to = (int)$_POST['connected_to'];
     $status = (int)$_POST['status'];
+    $current_company = trim($_POST['current_company']);
+    $current_job_title = trim($_POST['current_job_title']);
     
     $errors = [];
     if (empty($firstname)) $errors[] = "First name is required.";
@@ -81,11 +83,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     email = ?, 
                                     connected_to = ?, 
                                     avatar = ?, 
-                                    status = ? 
+                                    status = ?,
+                                    current_company = ?,
+                                    current_job_title = ?
                                     WHERE alumni_id = ?";
                     $stmt = $conn->prepare($update_query);
-                    $stmt->bind_param("ssssiisssss", $firstname, $middlename, $lastname, $gender, 
-                                    $batch, $course_id, $email, $connected_to, $avatar, $status, $alumni_id);
+                    $stmt->bind_param("ssssiisssssss", $firstname, $middlename, $lastname, $gender, 
+                                    $batch, $course_id, $email, $connected_to, $avatar, $status,
+                                    $current_company, $current_job_title, $alumni_id);
                 } else {
                     $update_query = "UPDATE alumnus_bio SET 
                                     firstname = ?, 
@@ -96,11 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     course_id = ?, 
                                     email = ?, 
                                     connected_to = ?, 
-                                    status = ? 
+                                    status = ?,
+                                    current_company = ?,
+                                    current_job_title = ?
                                     WHERE alumni_id = ?";
                     $stmt = $conn->prepare($update_query);
-                    $stmt->bind_param("ssssiisiss", $firstname, $middlename, $lastname, $gender, 
-                                    $batch, $course_id, $email, $connected_to, $status, $alumni_id);
+                    $stmt->bind_param("ssssiisisss", $firstname, $middlename, $lastname, $gender, 
+                                    $batch, $course_id, $email, $connected_to, $status,
+                                    $current_company, $current_job_title, $alumni_id);
                 }
                 
                 if ($stmt->execute()) {
@@ -873,6 +881,22 @@ $current_year = date('Y');
                                     </label>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-briefcase"></i> Employment Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="current_company">Current Company/Organization:</label>
+                            <input type="text" id="current_company" name="current_company" class="form-control" 
+                                   value="<?php echo htmlspecialchars($alumni['current_company'] ?? ''); ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="current_job_title">Current Job Title/Position:</label>
+                            <input type="text" id="current_job_title" name="current_job_title" class="form-control" 
+                                   value="<?php echo htmlspecialchars($alumni['current_job_title'] ?? ''); ?>">
                         </div>
                     </div>
                     

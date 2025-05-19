@@ -69,7 +69,7 @@ if(isset($_SESSION['login_id'])) {
             <a href="alumni-list.php"><img src="images/alumni_list.png" alt="Alumni List"><span>Alumni List</span></a>
             <a href="alumni-job.php"><img src="images/jobs.png" alt="Jobs"><span>Jobs</span></a>
             <a href="alumni-forums.php"><img src="images/forums.png" alt="Forums"><span>Forums</span></a>
-            <a href="alumni-system-setting.php"><img src="images/settings.png" alt="Settings"><span>Settings</span></a>
+            <a href="alumni-events.php"><img src="images/calendar.png" alt="Events"><span>Events</span></a>
             <a href="alumni-about.php"><img src="images/about.png" alt="About"><span>About</span></a>
             <a href="landing.php"><img src="images/log-out.png" alt="Log Out"><span>Log Out</span></a>
         </div>

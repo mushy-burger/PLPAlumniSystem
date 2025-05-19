@@ -616,6 +616,38 @@ $user_data = $has_account ? $user_result->fetch_assoc() : null;
                             </div>
                         </div>
                     </div>
+
+                    <div class="content-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-briefcase"></i> Employment Information
+                        </h3>
+                        
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <span class="info-label">Current Company/Organization</span>
+                                <div class="info-value">
+                                    <?php if(!empty($alumni['current_company'])): ?>
+                                        <i class="fas fa-building"></i> 
+                                        <?php echo htmlspecialchars($alumni['current_company']); ?>
+                                    <?php else: ?>
+                                        <em>Not provided</em>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <span class="info-label">Current Job Title/Position</span>
+                                <div class="info-value">
+                                    <?php if(!empty($alumni['current_job_title'])): ?>
+                                        <i class="fas fa-id-badge"></i> 
+                                        <?php echo htmlspecialchars($alumni['current_job_title']); ?>
+                                    <?php else: ?>
+                                        <em>Not provided</em>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div id="academic-tab" class="tab-content">

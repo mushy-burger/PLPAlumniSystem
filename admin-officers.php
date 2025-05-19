@@ -97,11 +97,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $current_year = date('Y');
 $selected_year = isset($_GET['year']) ? $_GET['year'] : $current_year;
 
+$any_officers_query = "SELECT COUNT(*) as count FROM alumni_officers";
+$any_officers_result = $conn->query($any_officers_query);
+$has_any_officers = ($any_officers_result && $any_officers_result->fetch_assoc()['count'] > 0);
+
 $years_query = "SELECT DISTINCT class_year FROM alumni_officers ORDER BY class_year DESC";
 $years_result = $conn->query($years_query);
 $available_years = [];
-while($row = $years_result->fetch_assoc()) {
-    $available_years[] = $row['class_year'];
+
+if ($years_result && $years_result->num_rows > 0) {
+    while($row = $years_result->fetch_assoc()) {
+        $available_years[] = $row['class_year'];
+    }
+    
+    if (!in_array($selected_year, $available_years) && !empty($available_years)) {
+        $selected_year = $available_years[0]; 
+    }
+} else if (!$has_any_officers) {
+    $available_years[] = $current_year;
 }
 
 $officers_query = "SELECT * FROM alumni_officers 
@@ -568,11 +581,16 @@ $officers_count = $count_result->fetch_assoc()['count'];
                 <div class="header-actions">
                     <form method="get" class="year-selector">
                         <select name="year" onchange="this.form.submit()" class="form-control">
-                            <?php foreach($available_years as $year): ?>
-                                <option value="<?php echo $year; ?>" <?php echo $year == $selected_year ? 'selected' : ''; ?>>
-                                    <?php echo $year; ?>
-                                </option>
-                            <?php endforeach; ?>
+                            <?php
+                            if(!empty($available_years)): ?>
+                                <?php foreach($available_years as $year): ?>
+                                    <option value="<?php echo $year; ?>" <?php echo $year == $selected_year ? 'selected' : ''; ?>>
+                                        <?php echo $year; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <option value="<?php echo $current_year; ?>"><?php echo $current_year; ?></option>
+                            <?php endif; ?>
                         </select>
                     </form>
                     <?php if($officers_count > 0): ?>
@@ -689,7 +707,6 @@ $officers_count = $count_result->fetch_assoc()['count'];
             }
         }
         
-        // Image preview functionality
         function previewImage(input, previewId) {
             const preview = document.getElementById(previewId);
             const previewImg = preview.querySelector('img');

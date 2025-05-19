@@ -1,6 +1,9 @@
 <?php
 session_start();
 include 'admin/db_connect.php';
+include 'archive_functions.php';
+
+date_default_timezone_set('Asia/Manila'); 
 
 $check_archive_table = $conn->query("SHOW TABLES LIKE 'archived_events'");
 if ($check_archive_table->num_rows == 0) {
@@ -29,26 +32,22 @@ if ($check_archive_date->num_rows == 0) {
     }
 }
 
-$current_date = date('Y-m-d H:i:s');
-$get_expired = $conn->query("SELECT * FROM events WHERE archive_date IS NOT NULL AND archive_date <= '$current_date'");
+$archive_result = archive_expired_events($conn);
 
-if ($get_expired && $get_expired->num_rows > 0) {
-    while ($row = $get_expired->fetch_assoc()) {
-        $event_id = $row['id'];
-        $title = $conn->real_escape_string($row['title']);
-        $content = $conn->real_escape_string($row['content']);
-        $schedule = $row['schedule'];
-        $banner = $row['banner'];
-        $gform_link = $conn->real_escape_string($row['gform_link'] ?? '');
-        
-        $insert_archive = "INSERT INTO archived_events (title, content, schedule, banner, gform_link, original_id) 
-                           VALUES ('$title', '$content', '$schedule', '$banner', '$gform_link', $event_id)";
-        
-        if ($conn->query($insert_archive)) {
-            $conn->query("DELETE FROM events WHERE id = $event_id");
-        }
-    }
+if ($archive_result['archived_count'] > 0) {
+    $_SESSION['success'] = $archive_result['archived_count'] . " events were automatically archived.";
 }
+
+if (!empty($archive_result['errors'])) {
+    $_SESSION['debug_archive'] = $archive_result['errors'];
+}
+
+$_SESSION['archive_debug'] = [
+    'timezone' => $archive_result['debug']['php_timezone'],
+    'current_time' => $archive_result['debug']['current_time_readable'],
+    'mysql_time' => $archive_result['debug']['mysql_server_time'] ?? 'Not available',
+    'details' => array_slice($archive_result['details'], 0, 3) 
+];
 
 if (isset($_POST['action'])) {
     $action = $_POST['action'];
@@ -56,7 +55,30 @@ if (isset($_POST['action'])) {
     $content = $conn->real_escape_string($_POST['content']);
     $schedule = $conn->real_escape_string($_POST['schedule']);
     $gform_link = $conn->real_escape_string($_POST['gform_link']);
-    $archive_date = !empty($_POST['archive_date']) ? "'".$conn->real_escape_string($_POST['archive_date'])."'" : "NULL";
+    
+    if (!empty($_POST['archive_date'])) {
+        $archive_date_value = $_POST['archive_date'];
+        
+        if (strpos($archive_date_value, 'T') !== false) {
+            $archive_date_value = str_replace('T', ' ', $archive_date_value);
+            
+            if (strpos($archive_date_value, '23:59') !== false) {
+                $archive_date_value .= ':59';
+            } else {
+                $archive_date_value .= ':00';
+            }
+        }
+        
+        if (strlen($archive_date_value) <= 10 || strpos($archive_date_value, ':') === false) {
+            $archive_date_value .= ' 23:59:59';
+        }
+        
+        $archive_date = "'" . $conn->real_escape_string($archive_date_value) . "'";
+        
+        $_SESSION['debug_archive_date'] = "Archive date set to: " . $archive_date_value;
+    } else {
+        $archive_date = "NULL";
+    }
 
     if ($action == 'edit_no_image') {
         $event_id = intval($_POST['event_id']);
@@ -201,6 +223,33 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     exit();
 }
 
+if (isset($_GET['delete_archived']) && is_numeric($_GET['delete_archived'])) {
+    $archived_id = intval($_GET['delete_archived']);
+    
+    $check_result = $conn->query("SELECT banner FROM archived_events WHERE id='$archived_id'");
+    
+    if ($check_result && $check_result->num_rows > 0) {
+        $event_data = $check_result->fetch_assoc();
+        
+        if($event_data['banner'] != 'no-image.jpg' && file_exists($event_data['banner'])) {
+            unlink($event_data['banner']);
+        }
+        
+        $sql = "DELETE FROM archived_events WHERE id=$archived_id";
+        
+        if ($conn->query($sql)) {
+            $_SESSION['success'] = "Archived event deleted successfully!";
+        } else {
+            $_SESSION['error'] = "Error deleting archived event: " . $conn->error;
+        }
+    } else {
+        $_SESSION['error'] = "Archived event not found.";
+    }
+    
+    header("Location: admin-event.php?view=archived");
+    exit();
+}
+
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $items_per_page = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $offset = ($page - 1) * $items_per_page;
@@ -303,6 +352,61 @@ if (!file_exists('uploads/events')) {
               </div>
           <?php endif; ?>
           
+          <?php if(isset($_SESSION['debug_archive_date'])): ?>
+              <div class="alert-info" style="background-color: #d9edf7; color: #31708f; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                  <?php 
+                      echo $_SESSION['debug_archive_date']; 
+                      unset($_SESSION['debug_archive_date']);
+                  ?>
+              </div>
+          <?php endif; ?>
+          
+          <?php if(isset($_SESSION['debug_archive'])): ?>
+              <div class="alert-warning" style="background-color: #fcf8e3; color: #8a6d3b; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                  <h4>Archive Process Warnings:</h4>
+                  <ul>
+                  <?php 
+                      foreach($_SESSION['debug_archive'] as $error) {
+                          echo "<li>$error</li>";
+                      }
+                      unset($_SESSION['debug_archive']);
+                  ?>
+                  </ul>
+              </div>
+          <?php endif; ?>
+          
+          <?php if(isset($_SESSION['archive_debug'])): ?>
+              <div class="alert-info" style="background-color: #d9edf7; color: #31708f; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 0.9em;">
+                  <h4>Archive Process Debug Information:</h4>
+                  <p><strong>Server Timezone:</strong> <?php echo $_SESSION['archive_debug']['timezone']; ?></p>
+                  <p><strong>Current Time:</strong> <?php echo $_SESSION['archive_debug']['current_time']; ?></p>
+                  <p><strong>MySQL Time:</strong> <?php echo $_SESSION['archive_debug']['mysql_time']; ?></p>
+                  
+                  <?php if(!empty($_SESSION['archive_debug']['details'])): ?>
+                  <h5>Event Details:</h5>
+                  <?php foreach($_SESSION['archive_debug']['details'] as $detail): ?>
+                      <div style="margin-bottom: 10px; padding: 5px; border-left: 3px solid #31708f;">
+                          <p><strong>Event:</strong> <?php echo htmlspecialchars($detail['title']); ?> (ID: <?php echo $detail['id']; ?>)</p>
+                          <p><strong>Archive Date:</strong> <?php echo htmlspecialchars($detail['archive_time_readable']); ?></p>
+                          
+                          <?php if(isset($detail['debug_time'])): ?>
+                          <p><strong>Should Archive:</strong> <?php echo $detail['debug_time']['should_archive']; ?></p>
+                          <p><strong>Reason:</strong> <?php echo $detail['debug_time']['reason']; ?></p>
+                          <p><strong>Time Difference:</strong> <?php echo $detail['debug_time']['time_diff_seconds']; ?> seconds</p>
+                          <?php endif; ?>
+                          
+                          <?php if(isset($detail['status'])): ?>
+                          <p><strong>Status:</strong> <?php echo $detail['status']; ?></p>
+                          <?php endif; ?>
+                      </div>
+                  <?php endforeach; ?>
+                  <?php endif; ?>
+                  
+                  <button type="button" onclick="this.parentNode.style.display='none';" style="background: #31708f; color: white; border: none; padding: 5px 10px; cursor: pointer;">Hide Details</button>
+              </div>
+              <?php unset($_SESSION['archive_debug']); ?>
+          <?php endif; ?>
+          
           <div class="event-tabs">
               <button class="tab-btn <?php echo !isset($_GET['view']) || $_GET['view'] != 'archived' ? 'active' : ''; ?>" onclick="location.href='admin-event.php'">Active Events</button>
               <button class="tab-btn <?php echo isset($_GET['view']) && $_GET['view'] == 'archived' ? 'active' : ''; ?>" onclick="location.href='admin-event.php?view=archived'">Archived Events</button>
@@ -324,7 +428,7 @@ if (!file_exists('uploads/events')) {
                           <span>Entries</span>
                           <span class="search-label">Search:</span>
                           <input type="text" name="search" class="search-input" value="<?php echo htmlspecialchars($search); ?>" placeholder="Event title, description...">
-                          <button type="submit" class="alist-filter">Filter</button>
+                          <button type="submit" class="alist-filter">Search</button>
                       </form>
                   </div>
               </div>
@@ -425,6 +529,8 @@ if (!file_exists('uploads/events')) {
                                       data-archive-date="<?php echo htmlspecialchars($row['archive_date'] ?? ''); ?>"
                                       onclick="editEvent(this)">Edit</button>
                               <button class="delete-btn" onclick="confirmDelete(<?php echo $row['id']; ?>)">Delete</button>
+                              <?php else: ?>
+                              <button class="delete-btn" onclick="confirmDeleteArchived(<?php echo $row['id']; ?>)">Delete</button>
                               <?php endif; ?>
                           </td>
                       </tr>
@@ -630,6 +736,12 @@ if (!file_exists('uploads/events')) {
       }
 
       document.addEventListener('DOMContentLoaded', function() {
+          // Initialize modal variables within DOMContentLoaded
+          viewModal = document.getElementById("viewEventModal");
+          editModal = document.getElementById("editEventModal");
+          addModal = document.getElementById("addEventModal");
+          window.deleteModal = document.getElementById("deleteEventModal");
+          
           const editForm = document.getElementById('editEventForm');
           const fileInput = document.getElementById('editBanner');
           const keepExistingField = document.querySelector('input[name="keep_existing_banner"]');
@@ -653,6 +765,10 @@ if (!file_exists('uploads/events')) {
               if (!title || !schedule || !content) {
                   alert('Please fill in all required fields');
                   return;
+              }
+              
+              if (archiveDate) {
+                  console.log('Archive date being used:', archiveDate);
               }
               
               document.getElementById('editEventIdNoImage').value = eventId;
@@ -714,201 +830,234 @@ if (!file_exists('uploads/events')) {
       
       document.addEventListener('DOMContentLoaded', setMinDateTime);
 
-      const viewModal = document.getElementById("viewEventModal");
-      const editModal = document.getElementById("editEventModal");
-      const addModal = document.getElementById("addEventModal");
-      const deleteModal = document.getElementById("deleteEventModal");
+      let viewModal;
+      let editModal;
+      let addModal;
       
-      document.getElementById('closeViewModal').addEventListener("click", () => {
-          viewModal.style.display = "none";
-      });
-      
-      document.getElementById('cancelEditBtn').addEventListener("click", () => {
-          editModal.style.display = "none";
-      });
-      
-      document.getElementById('openAddModal').addEventListener("click", () => {
-          document.getElementById('addEventForm').reset();
-          document.getElementById('newBannerPreview').src = "images/no-image.jpg";
-          
-          const now = new Date();
-          const year = now.getFullYear();
-          const month = String(now.getMonth() + 1).padStart(2, '0');
-          const day = String(now.getDate()).padStart(2, '0');
-          const hours = String(now.getHours()).padStart(2, '0');
-          const minutes = String(now.getMinutes()).padStart(2, '0');
-          const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-          
-          document.getElementById('addSchedule').min = minDateTime;
-          document.getElementById('addArchiveDate').min = minDateTime;
-          
-          addModal.style.display = "flex";
-      });
-      
-      document.getElementById('cancelAddBtn').addEventListener("click", () => {
-          addModal.style.display = "none";
-      });
-
-      let deleteId = null;
-      function confirmDelete(id) {
-          deleteId = id;
-          deleteModal.style.display = "flex";
-      }
-      
-      document.getElementById('confirmDeleteBtn').addEventListener("click", () => {
-          if(deleteId) {
-              window.location.href = `admin-event.php?delete=${deleteId}`;
+      document.addEventListener('DOMContentLoaded', function() {
+          const closeViewModalBtn = document.getElementById('closeViewModal');
+          if (closeViewModalBtn) {
+              closeViewModalBtn.addEventListener("click", () => {
+                  viewModal.style.display = "none";
+              });
           }
-      });
-      
-      document.getElementById('cancelDeleteBtn').addEventListener("click", () => {
-          deleteModal.style.display = "none";
-      });
-
-      function viewEvent(btn) {
-          const title = btn.getAttribute('data-title');
-          const content = btn.getAttribute('data-content');
-          const schedule = new Date(btn.getAttribute('data-schedule')).toLocaleString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric'
-          });
-          const banner = btn.getAttribute('data-banner');
-          const gform = btn.getAttribute('data-gform');
-          const archiveDate = btn.getAttribute('data-archive-date');
-
-          document.getElementById('viewModalTitle').textContent = title;
-          document.getElementById('modalSchedule').textContent = schedule;
-          document.getElementById('modalContent').innerHTML = content;
-          document.getElementById('modalBanner').src = banner;
           
-          const archiveDateContainer = document.getElementById('archiveDateContainer');
-          if (archiveDate && archiveDate.trim() !== '') {
-              const formattedArchiveDate = new Date(archiveDate).toLocaleString('en-US', {
+          document.getElementById('cancelEditBtn').addEventListener("click", () => {
+              editModal.style.display = "none";
+          });
+          
+          document.getElementById('openAddModal').addEventListener("click", () => {
+              document.getElementById('addEventForm').reset();
+              document.getElementById('newBannerPreview').src = "images/no-image.jpg";
+              
+              const now = new Date();
+              const year = now.getFullYear();
+              const month = String(now.getMonth() + 1).padStart(2, '0');
+              const day = String(now.getDate()).padStart(2, '0');
+              const hours = String(now.getHours()).padStart(2, '0');
+              const minutes = String(now.getMinutes()).padStart(2, '0');
+              const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+              
+              document.getElementById('addSchedule').min = minDateTime;
+              document.getElementById('addArchiveDate').min = minDateTime;
+              
+              addModal.style.display = "flex";
+          });
+          
+          document.getElementById('cancelAddBtn').addEventListener("click", () => {
+              addModal.style.display = "none";
+          });
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+          let deleteId = null;
+          let isArchived = false;
+          
+          window.confirmDelete = function(id) {
+              deleteId = id;
+              isArchived = false;
+              document.getElementById('deleteEventModal').querySelector('h2').textContent = 'Delete Event';
+              window.deleteModal.style.display = "flex";
+              console.log('Delete active event:', id);
+          };
+          
+          window.confirmDeleteArchived = function(id) {
+              deleteId = id;
+              isArchived = true;
+              document.getElementById('deleteEventModal').querySelector('h2').textContent = 'Delete Archived Event';
+              window.deleteModal.style.display = "flex";
+              console.log('Delete archived event:', id);
+          };
+          
+          document.getElementById('confirmDeleteBtn').addEventListener("click", () => {
+              if(deleteId) {
+                  if(isArchived) {
+                      console.log('Redirecting to delete archived event:', deleteId);
+                      window.location.href = `admin-event.php?delete_archived=${deleteId}&view=archived`;
+                  } else {
+                      console.log('Redirecting to delete event:', deleteId);
+                      window.location.href = `admin-event.php?delete=${deleteId}`;
+                  }
+              }
+          });
+          
+          document.getElementById('cancelDeleteBtn').addEventListener("click", () => {
+              window.deleteModal.style.display = "none";
+          });
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+              window.viewEvent = function(btn) {
+              const title = btn.getAttribute('data-title');
+              const content = btn.getAttribute('data-content');
+              const schedule = new Date(btn.getAttribute('data-schedule')).toLocaleString('en-US', {
+                  weekday: 'long',
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                   hour: 'numeric',
                   minute: 'numeric'
               });
-              document.getElementById('modalArchiveDate').textContent = formattedArchiveDate;
-              document.getElementById('archiveDateContainer').querySelector('h4').textContent = 'Auto-Archive Date';
-              archiveDateContainer.style.display = 'flex';
-          } else {
-              archiveDateContainer.style.display = 'none';
+              const banner = btn.getAttribute('data-banner');
+              const gform = btn.getAttribute('data-gform');
+              const archiveDate = btn.getAttribute('data-archive-date');
+    
+              document.getElementById('viewModalTitle').textContent = title;
+              document.getElementById('modalSchedule').textContent = schedule;
+              document.getElementById('modalContent').innerHTML = content;
+              document.getElementById('modalBanner').src = banner;
+              
+              const archiveDateContainer = document.getElementById('archiveDateContainer');
+              if (archiveDate && archiveDate.trim() !== '') {
+                  const formattedArchiveDate = new Date(archiveDate).toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric'
+                  });
+                  document.getElementById('modalArchiveDate').textContent = formattedArchiveDate;
+                  document.getElementById('archiveDateContainer').querySelector('h4').textContent = 'Auto-Archive Date';
+                  archiveDateContainer.style.display = 'flex';
+              } else {
+                  archiveDateContainer.style.display = 'none';
+              }
+              
+              const gformContainer = document.getElementById('gformContainer');
+              const gformContent = document.getElementById('modalGform');
+              if (gform && gform.trim() !== '') {
+                  gformContent.innerHTML = `
+                    <h4>Registration</h4>
+                    <p>
+                      <a href="${gform}" target="_blank" class="gform-link">
+                        Registration Form <i class="fas fa-external-link-alt"></i>
+                      </a>
+                    </p>`;
+                  gformContainer.style.display = 'flex';
+              } else {
+                  gformContent.innerHTML = `
+                    <h4>Registration</h4>
+                    <p class="no-link">No registration form available</p>`;
+                  gformContainer.style.display = 'flex';
+              }
+    
+              viewModal.style.display = "flex";
           }
-          
-          const gformContainer = document.getElementById('gformContainer');
-          const gformContent = document.getElementById('modalGform');
-          if (gform && gform.trim() !== '') {
-              gformContent.innerHTML = `
-                <h4>Registration</h4>
-                <p>
-                  <a href="${gform}" target="_blank" class="gform-link">
-                    Registration Form <i class="fas fa-external-link-alt"></i>
-                  </a>
-                </p>`;
-              gformContainer.style.display = 'flex';
-          } else {
-              gformContent.innerHTML = `
-                <h4>Registration</h4>
-                <p class="no-link">No registration form available</p>`;
-              gformContainer.style.display = 'flex';
-          }
+      });
 
-          viewModal.style.display = "flex";
-      }
-
-      function editEvent(btn) {
-          const id = btn.getAttribute('data-id');
-          const title = btn.getAttribute('data-title');
-          const content = btn.getAttribute('data-content');
-          const schedule = btn.getAttribute('data-schedule');
-          const banner = btn.getAttribute('data-banner');
-          const gform = btn.getAttribute('data-gform');
-          const archiveDate = btn.getAttribute('data-archive-date') || '';
-          
-          const dateObj = new Date(schedule);
-          const formattedDate = dateObj.toISOString().slice(0, 16);
-          const now = new Date();
-
-          document.getElementById('editEventId').value = id;
-          document.getElementById('editTitle').value = title;
-          document.getElementById('editSchedule').value = formattedDate;
-          document.getElementById('editContent').value = content;
-          document.getElementById('currentBanner').src = banner;
-          document.getElementById('editGformLink').value = gform || '';
-          
-          if (archiveDate && archiveDate.trim() !== '') {
-              const archiveDateObj = new Date(archiveDate);
-              const formattedArchiveDate = archiveDateObj.toISOString().slice(0, 16);
-              document.getElementById('editArchiveDate').value = formattedArchiveDate;
-          } else {
-              document.getElementById('editArchiveDate').value = '';
-          }
-          
-          const editScheduleInput = document.getElementById('editSchedule');
-          if (dateObj > now) {
-              const year = now.getFullYear();
-              const month = String(now.getMonth() + 1).padStart(2, '0');
-              const day = String(now.getDate()).padStart(2, '0');
-              const hours = String(now.getHours()).padStart(2, '0');
-              const minutes = String(now.getMinutes()).padStart(2, '0');
-              const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-              editScheduleInput.min = minDateTime;
-              document.getElementById('editArchiveDate').min = minDateTime;
-          } else {
-              editScheduleInput.min = formattedDate;
-              const year = now.getFullYear();
-              const month = String(now.getMonth() + 1).padStart(2, '0');
-              const day = String(now.getDate()).padStart(2, '0');
-              const hours = String(now.getHours()).padStart(2, '0');
-              const minutes = String(now.getMinutes()).padStart(2, '0');
-              const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-              document.getElementById('editArchiveDate').min = minDateTime;
-          }
-
-          editModal.style.display = "flex";
-      }
-      
-      document.getElementById('addBanner').addEventListener('change', function(e) {
-          const file = e.target.files[0];
-          if (file) {
-              const reader = new FileReader();
-              reader.onload = function(event) {
-                  document.getElementById('newBannerPreview').src = event.target.result;
-              };
-              reader.readAsDataURL(file);
+      document.addEventListener('DOMContentLoaded', function() {
+          window.editEvent = function(btn) {
+              const id = btn.getAttribute('data-id');
+              const title = btn.getAttribute('data-title');
+              const content = btn.getAttribute('data-content');
+              const schedule = btn.getAttribute('data-schedule');
+              const banner = btn.getAttribute('data-banner');
+              const gform = btn.getAttribute('data-gform');
+              const archiveDate = btn.getAttribute('data-archive-date') || '';
+              
+              const dateObj = new Date(schedule);
+              const formattedDate = dateObj.toISOString().slice(0, 16);
+              const now = new Date();
+    
+              document.getElementById('editEventId').value = id;
+              document.getElementById('editTitle').value = title;
+              document.getElementById('editSchedule').value = formattedDate;
+              document.getElementById('editContent').value = content;
+              document.getElementById('currentBanner').src = banner;
+              document.getElementById('editGformLink').value = gform || '';
+              
+              if (archiveDate && archiveDate.trim() !== '') {
+                  const archiveDateObj = new Date(archiveDate);
+                  const formattedArchiveDate = archiveDateObj.toISOString().slice(0, 16);
+                  document.getElementById('editArchiveDate').value = formattedArchiveDate;
+              } else {
+                  document.getElementById('editArchiveDate').value = '';
+              }
+              
+              const editScheduleInput = document.getElementById('editSchedule');
+              if (dateObj > now) {
+                  const year = now.getFullYear();
+                  const month = String(now.getMonth() + 1).padStart(2, '0');
+                  const day = String(now.getDate()).padStart(2, '0');
+                  const hours = String(now.getHours()).padStart(2, '0');
+                  const minutes = String(now.getMinutes()).padStart(2, '0');
+                  const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                  editScheduleInput.min = minDateTime;
+                  document.getElementById('editArchiveDate').min = minDateTime;
+              } else {
+                  editScheduleInput.min = formattedDate;
+                  const year = now.getFullYear();
+                  const month = String(now.getMonth() + 1).padStart(2, '0');
+                  const day = String(now.getDate()).padStart(2, '0');
+                  const hours = String(now.getHours()).padStart(2, '0');
+                  const minutes = String(now.getMinutes()).padStart(2, '0');
+                  const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                  document.getElementById('editArchiveDate').min = minDateTime;
+              }
+    
+              editModal.style.display = "flex";
           }
       });
       
-      document.getElementById('editBanner').addEventListener('change', function(e) {
-          const file = e.target.files[0];
-          if (file) {
-              const reader = new FileReader();
-              reader.onload = function(event) {
-                  document.getElementById('currentBanner').src = event.target.result;
-              };
-              reader.readAsDataURL(file);
-          }
+      document.addEventListener('DOMContentLoaded', function() {
+          document.getElementById('addBanner').addEventListener('change', function(e) {
+              const file = e.target.files[0];
+              if (file) {
+                  const reader = new FileReader();
+                  reader.onload = function(event) {
+                      document.getElementById('newBannerPreview').src = event.target.result;
+                  };
+                  reader.readAsDataURL(file);
+              }
+          });
+          
+          document.getElementById('editBanner').addEventListener('change', function(e) {
+              const file = e.target.files[0];
+              if (file) {
+                  const reader = new FileReader();
+                  reader.onload = function(event) {
+                      document.getElementById('currentBanner').src = event.target.result;
+                  };
+                  reader.readAsDataURL(file);
+              }
+          });
       });
       
-      window.addEventListener("click", (e) => {
-          if (e.target === viewModal) {
-              viewModal.style.display = "none";
-          }
-          if (e.target === editModal) {
-              editModal.style.display = "none";
-          }
-          if (e.target === addModal) {
-              addModal.style.display = "none";
-          }
-          if (e.target === deleteModal) {
-              deleteModal.style.display = "none";
-          }
+      document.addEventListener('DOMContentLoaded', function() {
+          window.addEventListener("click", (e) => {
+              if (e.target === viewModal) {
+                  viewModal.style.display = "none";
+              }
+              if (e.target === editModal) {
+                  editModal.style.display = "none";
+              }
+              if (e.target === addModal) {
+                  addModal.style.display = "none";
+              }
+              if (e.target === window.deleteModal) {
+                  window.deleteModal.style.display = "none";
+              }
+          });
       });
       
       document.addEventListener('DOMContentLoaded', function() {
@@ -929,62 +1078,64 @@ if (!file_exists('uploads/events')) {
           window.location.href = currentUrl.toString();
       }
 
-      function viewArchivedEvent(btn) {
-          const title = btn.getAttribute('data-title');
-          const content = btn.getAttribute('data-content');
-          const schedule = new Date(btn.getAttribute('data-schedule')).toLocaleString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric'
-          });
-          const banner = btn.getAttribute('data-banner');
-          const gform = btn.getAttribute('data-gform');
-          const archivedDate = btn.getAttribute('data-archived-date');
-
-          document.getElementById('viewModalTitle').textContent = title;
-          document.getElementById('modalSchedule').textContent = schedule;
-          document.getElementById('modalContent').innerHTML = content;
-          document.getElementById('modalBanner').src = banner;
-          
-          const archiveDateContainer = document.getElementById('archiveDateContainer');
-          if (archivedDate && archivedDate.trim() !== '') {
-              const formattedArchivedDate = new Date(archivedDate).toLocaleString('en-US', {
+      document.addEventListener('DOMContentLoaded', function() {
+          window.viewArchivedEvent = function(btn) {
+              const title = btn.getAttribute('data-title');
+              const content = btn.getAttribute('data-content');
+              const schedule = new Date(btn.getAttribute('data-schedule')).toLocaleString('en-US', {
+                  weekday: 'long',
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                   hour: 'numeric',
                   minute: 'numeric'
               });
-              document.getElementById('modalArchiveDate').textContent = formattedArchivedDate;
-              document.getElementById('archiveDateContainer').querySelector('h4').textContent = 'Archived On';
-              archiveDateContainer.style.display = 'flex';
-          } else {
-              archiveDateContainer.style.display = 'none';
+              const banner = btn.getAttribute('data-banner');
+              const gform = btn.getAttribute('data-gform');
+              const archivedDate = btn.getAttribute('data-archived-date');
+    
+              document.getElementById('viewModalTitle').textContent = title;
+              document.getElementById('modalSchedule').textContent = schedule;
+              document.getElementById('modalContent').innerHTML = content;
+              document.getElementById('modalBanner').src = banner;
+              
+              const archiveDateContainer = document.getElementById('archiveDateContainer');
+              if (archivedDate && archivedDate.trim() !== '') {
+                  const formattedArchivedDate = new Date(archivedDate).toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric'
+                  });
+                  document.getElementById('modalArchiveDate').textContent = formattedArchivedDate;
+                  document.getElementById('archiveDateContainer').querySelector('h4').textContent = 'Archived On';
+                  archiveDateContainer.style.display = 'flex';
+              } else {
+                  archiveDateContainer.style.display = 'none';
+              }
+              
+              const gformContainer = document.getElementById('gformContainer');
+              const gformContent = document.getElementById('modalGform');
+              if (gform && gform.trim() !== '') {
+                  gformContent.innerHTML = `
+                    <h4>Registration</h4>
+                    <p>
+                      <a href="${gform}" target="_blank" class="gform-link">
+                        Registration Form <i class="fas fa-external-link-alt"></i>
+                      </a>
+                    </p>`;
+                  gformContainer.style.display = 'flex';
+              } else {
+                  gformContent.innerHTML = `
+                    <h4>Registration</h4>
+                    <p class="no-link">No registration form available</p>`;
+                  gformContainer.style.display = 'flex';
+              }
+    
+              viewModal.style.display = "flex";
           }
-          
-          const gformContainer = document.getElementById('gformContainer');
-          const gformContent = document.getElementById('modalGform');
-          if (gform && gform.trim() !== '') {
-              gformContent.innerHTML = `
-                <h4>Registration</h4>
-                <p>
-                  <a href="${gform}" target="_blank" class="gform-link">
-                    Registration Form <i class="fas fa-external-link-alt"></i>
-                  </a>
-                </p>`;
-              gformContainer.style.display = 'flex';
-          } else {
-              gformContent.innerHTML = `
-                <h4>Registration</h4>
-                <p class="no-link">No registration form available</p>`;
-              gformContainer.style.display = 'flex';
-          }
-
-          viewModal.style.display = "flex";
-      }
+      });
   </script>
 </body>
 </html>

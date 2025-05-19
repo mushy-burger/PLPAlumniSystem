@@ -156,7 +156,7 @@ function build_query_params($exclude = []) {
                                 <div class="search-control">
                                     <span>Search:</span>
                                     <input type="text" name="search" class="search-input" value="<?php echo htmlspecialchars($search); ?>" placeholder="Company, Job Title...">
-                                    <button type="submit" class="alist-filter">Filter</button>
+                                    <button type="submit" class="alist-filter">Search</button>
                                 </div>
                             </div>
                         </form>

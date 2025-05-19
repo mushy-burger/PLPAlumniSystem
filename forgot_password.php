@@ -62,7 +62,7 @@ if(isset($_POST['reset_password'])) {
                 
                 $mail->addAddress($email_to_use);
                 
-                $reset_link = "http://{$_SERVER['HTTP_HOST']}/ALUMNI_PORTAL/reset_password.php?token=$token";
+                $reset_link = "http://{$_SERVER['HTTP_HOST']}/reset_password.php?token=$token";
                 
                 $mail->isHTML(true);
                 $mail->Subject = 'Password Reset - PLP Alumni Portal';

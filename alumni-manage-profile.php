@@ -49,6 +49,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     $connected_to = $_POST['connected_to'];
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
+    $current_company = trim($_POST['current_company']);
+    $current_job_title = trim($_POST['current_job_title']);
     
     $errors = [];
     if(empty($firstname)) $errors[] = "First name is required";
@@ -85,11 +87,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
                             batch = ?, 
                             course_id = ?, 
                             email = ?, 
+                            current_company = ?,
+                            current_job_title = ?,
                             connected_to = ? 
                             WHERE alumni_id = ?";
             
             $stmt = $conn->prepare($update_query);
-            $stmt->bind_param("sssssiiss", 
+            $stmt->bind_param("sssssisssis", 
                 $firstname,
                 $middlename,
                 $lastname,
@@ -97,6 +101,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $batch,
                 $course_id,
                 $email,
+                $current_company,
+                $current_job_title,
                 $connected_to,
                 $alumni_id
             );
@@ -295,6 +301,22 @@ if(!empty($alumnus['avatar']) && file_exists($alumnus['avatar'])) {
                             </div>
                             
                             <div class="form-card">
+                                <h3 class="form-section-title"><i class="fas fa-briefcase"></i> Employment Information</h3>
+                                <div class="form-section">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="current_company">Current Company/Organization</label>
+                                            <input type="text" name="current_company" id="current_company" value="<?php echo isset($alumnus['current_company']) ? htmlspecialchars($alumnus['current_company']) : ''; ?>">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="current_job_title">Current Job Title/Position</label>
+                                            <input type="text" name="current_job_title" id="current_job_title" value="<?php echo isset($alumnus['current_job_title']) ? htmlspecialchars($alumnus['current_job_title']) : ''; ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-card">
                                 <h3 class="form-section-title"><i class="fas fa-lock"></i> Account Information</h3>
                                 <div class="form-section">
                                     <div class="form-row">
@@ -433,13 +455,11 @@ if(!empty($alumnus['avatar']) && file_exists($alumnus['avatar'])) {
                 }
             });
 
-            // Password requirements checker
             const passwordField = document.getElementById('password');
             if (passwordField) {
                 passwordField.addEventListener('input', function() {
                     const password = this.value;
                     
-                    // Check requirements
                     const requirements = {
                         length: password.length >= 8,
                         uppercase: /[A-Z]/.test(password),
@@ -448,7 +468,6 @@ if(!empty($alumnus['avatar']) && file_exists($alumnus['avatar'])) {
                         special: /[^A-Za-z0-9]/.test(password)
                     };
                     
-                    // Update checklist UI
                     Object.keys(requirements).forEach(req => {
                         const li = document.getElementById(req);
                         if (li) {

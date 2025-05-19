@@ -232,19 +232,36 @@ if(isset($_SESSION['login_id'])) {
             }
             
             .alumni-batch {
-                margin: 0;
-                font-size: 12px;
+                font-size: 13px;
                 color: #666;
+                margin: 0 0 5px;
+            }
+            
+            .alumni-job {
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px dashed #e0e0e0;
+            }
+            
+            .alumni-position, .alumni-company {
+                font-size: 12px;
+                color: #555;
+                margin: 0 0 3px;
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                background-color: #f0f4fa;
-                padding: 3px 10px;
-                border-radius: 30px;
-                width: fit-content;
-                margin: 5px auto 0;
             }
-
+            
+            .alumni-position i, .alumni-company i {
+                margin-right: 5px;
+                font-size: 11px;
+                color: #003893;
+                opacity: 0.7;
+            }
+            
+            .alumni-position {
+                font-weight: 600;
+            }
+            
             .alumni-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -425,6 +442,16 @@ if(isset($_SESSION['login_id'])) {
                         <h3><?php echo htmlspecialchars($alumnus['firstname'] . ' ' . $alumnus['lastname']); ?></h3>
                         <p class="alumni-course"><?php echo htmlspecialchars($alumnus['course_name']); ?></p>
                         <p class="alumni-batch">Batch <?php echo htmlspecialchars($alumnus['batch']); ?></p>
+                        <?php if(!empty($alumnus['current_company']) || !empty($alumnus['current_job_title'])): ?>
+                        <div class="alumni-job">
+                            <?php if(!empty($alumnus['current_job_title'])): ?>
+                            <p class="alumni-position"><i class="fas fa-id-badge"></i> <?php echo htmlspecialchars($alumnus['current_job_title']); ?></p>
+                            <?php endif; ?>
+                            <?php if(!empty($alumnus['current_company'])): ?>
+                            <p class="alumni-company"><i class="fas fa-building"></i> <?php echo htmlspecialchars($alumnus['current_company']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php 
