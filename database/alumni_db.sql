@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 19, 2025 at 08:10 AM
+-- Generation Time: May 19, 2025 at 05:17 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -44,9 +44,7 @@ CREATE TABLE `alumni_officers` (
 --
 
 INSERT INTO `alumni_officers` (`id`, `name`, `position`, `class_year`, `course`, `image_path`, `display_order`, `created_at`, `updated_at`) VALUES
-(3, 'Pres', 'President', '2025', 'BS Information Technology', '', 0, '2025-05-18 18:21:30', '2025-05-18 18:21:30'),
 (4, 'Last Pres', 'President', '2024', 'BS Information Technology', '', 0, '2025-05-18 18:21:44', '2025-05-18 18:21:44'),
-(5, 'Vice Pres', 'Vice President', '2025', '', '', 0, '2025-05-18 18:21:54', '2025-05-18 18:21:54'),
 (6, ':ast Vice Pres', 'Vice President', '2024', 'BS Information Technology', '', 0, '2025-05-18 18:22:03', '2025-05-18 18:22:03');
 
 -- --------------------------------------------------------
@@ -65,6 +63,8 @@ CREATE TABLE `alumnus_bio` (
   `batch` year(4) NOT NULL,
   `course_id` int(30) NOT NULL,
   `email` varchar(250) NOT NULL,
+  `current_company` varchar(250) DEFAULT NULL,
+  `current_job_title` varchar(250) DEFAULT NULL,
   `connected_to` tinyint(1) NOT NULL,
   `avatar` text NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0= Unverified, 1= Verified',
@@ -75,44 +75,44 @@ CREATE TABLE `alumnus_bio` (
 -- Dumping data for table `alumnus_bio`
 --
 
-INSERT INTO `alumnus_bio` (`id`, `alumni_id`, `firstname`, `middlename`, `lastname`, `gender`, `batch`, `course_id`, `email`, `connected_to`, `avatar`, `status`, `date_created`) VALUES
-(37, '0001-0001', 'Juan', 'Dela', 'Cruz', 'Male', '2018', 1, 'juan.delacruz@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(38, '0001-0002', 'Maria', 'Santos', 'Reyes', 'Female', '2019', 2, 'maria.reyes@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(39, '0001-0003', 'Pedro', 'Garcia', 'Lim', 'Male', '2020', 3, 'pedro.lim@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(40, '0001-0004', 'Ana', 'Bautista', 'Santos', 'Female', '2018', 1, 'ana.santos@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(41, '0001-0005', 'Carlos', 'Mendoza', 'Reyes', 'Male', '2019', 4, 'carlos.reyes@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(42, '0001-0006', 'Sofia', 'Tan', 'Gonzales', 'Female', '2020', 2, 'sofia.gonzales@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(43, '0001-0007', 'Miguel', 'Santos', 'Tan', 'Male', '2021', 3, 'miguel.tan@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(44, '0001-0008', 'Isabella', 'Lopez', 'Garcia', 'Female', '2019', 2, 'isabella.garcia@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(45, '0001-0009', 'Gabriel', 'Diaz', 'Hernandez', 'Male', '2018', 1, 'gabriel.hernandez@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(46, '0001-0010', 'Camila', 'Reyes', 'Rodriguez', 'Female', '2020', 4, 'camila.rodriguez@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(47, '0002-0001', 'Rafael', 'Cruz', 'Martinez', 'Male', '2019', 1, 'rafael.martinez@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(48, '0002-0002', 'Victoria', 'Gomez', 'Flores', 'Female', '2021', 2, 'victoria.flores@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(49, '0002-0003', 'Alejandro', 'Morales', 'Sanchez', 'Male', '2018', 3, 'alejandro.sanchez@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(50, '0002-0004', 'Valentina', 'Torres', 'Rivera', 'Female', '2020', 4, 'valentina.rivera@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(51, '0002-0005', 'Daniel', 'Ortiz', 'Gutierrez', 'Male', '2019', 1, 'daniel.gutierrez@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(52, '0002-0006', 'Natalia', 'Ramos', 'Castillo', 'Female', '2018', 2, 'natalia.castillo@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(53, '0002-0007', 'Sebastian', 'Aguilar', 'Vargas', 'Male', '2021', 3, 'sebastian.vargas@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(54, '0002-0008', 'Olivia', 'Jimenez', 'Romero', 'Female', '2020', 4, 'olivia.romero@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(55, '0002-0009', 'Mateo', 'Navarro', 'Herrera', 'Male', '2019', 1, 'mateo.herrera@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(56, '0002-0010', 'Emma', 'Dominguez', 'Ruiz', 'Female', '2018', 2, 'emma.ruiz@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(57, '0003-0001', 'Samuel', 'Alvarez', 'Medina', 'Male', '2020', 3, 'samuel.medina@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(58, '0003-0002', 'Sophia', 'Castro', 'Fernandez', 'Female', '2019', 4, 'sophia.fernandez@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(59, '0003-0003', 'Lucas', 'Vasquez', 'Ramirez', 'Male', '2021', 1, 'lucas.ramirez@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(60, '0003-0004', 'Ava', 'Paredes', 'Mendoza', 'Female', '2018', 2, 'ava.mendoza@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(61, '0003-0005', 'Nicolas', 'Cabrera', 'Salazar', 'Male', '2020', 3, 'nicolas.salazar@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(62, '0003-0006', 'Chloe', 'Sandoval', 'Espinoza', 'Female', '2019', 4, 'chloe.espinoza@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(63, '0003-0007', 'Benjamin', 'Fuentes', 'Campos', 'Male', '2018', 1, 'benjamin.campos@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(64, '0003-0008', 'Mia', 'Rios', 'Delgado', 'Female', '2021', 2, 'mia.delgado@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(65, '0003-0009', 'Matias', 'Nunez', 'Pena', 'Male', '2020', 3, 'matias.pena@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(66, '0003-0010', 'Zoe', 'Lozano', 'Escobar', 'Female', '2019', 4, 'zoe.escobar@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(67, '0004-0001', 'David', 'Silva', 'Vega', 'Male', '2018', 1, 'david.vega@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(68, '0004-0002', 'Luna', 'Gallegos', 'Contreras', 'Female', '2020', 2, 'luna.contreras@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(69, '0004-0003', 'Emilio', 'Valencia', 'Solis', 'Male', '2019', 3, 'emilio.solis@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(70, '0004-0004', 'Lucia', 'Pineda', 'Molina', 'Female', '2021', 4, 'lucia.molina@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(71, '0004-0005', 'Santiago', 'Acosta', 'Miranda', 'Male', '2018', 1, 'santiago.miranda@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(72, '0004-0006', 'Valeria', 'Zuniga', 'Rojas', 'Female', '2020', 2, 'valeria.rojas@example.com', 0, 'avatar.png', 1, '2025-05-10'),
-(73, '0004-0007', 'Eduardo', 'Alvarado', 'Beltran', 'Male', '2019', 3, 'eduardo.beltran@example.com', 0, 'avatar.png', 1, '2025-05-10');
+INSERT INTO `alumnus_bio` (`id`, `alumni_id`, `firstname`, `middlename`, `lastname`, `gender`, `batch`, `course_id`, `email`, `current_company`, `current_job_title`, `connected_to`, `avatar`, `status`, `date_created`) VALUES
+(37, '0001-0001', 'Juan', 'Dela', 'Cruz', 'Male', '2018', 1, 'juan.delacruz@example.com', 'Google', 'Softawre', 0, 'avatar.png', 1, '2025-05-10'),
+(38, '0001-0002', 'Maria', 'Santos', 'Reyes', 'Female', '2019', 2, 'maria.reyes@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(39, '0001-0003', 'Pedro', 'Garcia', 'Lim', 'Male', '2020', 3, 'pedro.lim@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(40, '0001-0004', 'Ana', 'Bautista', 'Santos', 'Female', '2018', 1, 'ana.santos@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(41, '0001-0005', 'Carlos', 'Mendoza', 'Reyes', 'Male', '2019', 4, 'carlos.reyes@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(42, '0001-0006', 'Sofia', 'Tan', 'Gonzales', 'Female', '2020', 2, 'sofia.gonzales@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(43, '0001-0007', 'Miguel', 'Santos', 'Tan', 'Male', '2021', 3, 'miguel.tan@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(44, '0001-0008', 'Isabella', 'Lopez', 'Garcia', 'Female', '2019', 2, 'isabella.garcia@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(45, '0001-0009', 'Gabriel', 'Diaz', 'Hernandez', 'Male', '2018', 1, 'gabriel.hernandez@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(46, '0001-0010', 'Camila', 'Reyes', 'Rodriguez', 'Female', '2020', 4, 'camila.rodriguez@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(47, '0002-0001', 'Rafael', 'Cruz', 'Martinez', 'Male', '2019', 1, 'rafael.martinez@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(48, '0002-0002', 'Victoria', 'Gomez', 'Flores', 'Female', '2021', 2, 'victoria.flores@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(49, '0002-0003', 'Alejandro', 'Morales', 'Sanchez', 'Male', '2018', 3, 'alejandro.sanchez@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(50, '0002-0004', 'Valentina', 'Torres', 'Rivera', 'Female', '2020', 4, 'valentina.rivera@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(51, '0002-0005', 'Daniel', 'Ortiz', 'Gutierrez', 'Male', '2019', 1, 'daniel.gutierrez@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(52, '0002-0006', 'Natalia', 'Ramos', 'Castillo', 'Female', '2018', 2, 'natalia.castillo@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(53, '0002-0007', 'Sebastian', 'Aguilar', 'Vargas', 'Male', '2021', 3, 'sebastian.vargas@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(54, '0002-0008', 'Olivia', 'Jimenez', 'Romero', 'Female', '2020', 4, 'olivia.romero@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(55, '0002-0009', 'Mateo', 'Navarro', 'Herrera', 'Male', '2019', 1, 'mateo.herrera@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(56, '0002-0010', 'Emma', 'Dominguez', 'Ruiz', 'Female', '2018', 2, 'emma.ruiz@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(57, '0003-0001', 'Samuel', 'Alvarez', 'Medina', 'Male', '2020', 3, 'samuel.medina@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(58, '0003-0002', 'Sophia', 'Castro', 'Fernandez', 'Female', '2019', 4, 'sophia.fernandez@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(59, '0003-0003', 'Lucas', 'Vasquez', 'Ramirez', 'Male', '2021', 1, 'lucas.ramirez@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(60, '0003-0004', 'Ava', 'Paredes', 'Mendoza', 'Female', '2018', 2, 'ava.mendoza@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(61, '0003-0005', 'Nicolas', 'Cabrera', 'Salazar', 'Male', '2020', 3, 'nicolas.salazar@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(62, '0003-0006', 'Chloe', 'Sandoval', 'Espinoza', 'Female', '2019', 4, 'chloe.espinoza@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(63, '0003-0007', 'Benjamin', 'Fuentes', 'Campos', 'Male', '2018', 1, 'benjamin.campos@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(64, '0003-0008', 'Mia', 'Rios', 'Delgado', 'Female', '2021', 2, 'mia.delgado@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(65, '0003-0009', 'Matias', 'Nunez', 'Pena', 'Male', '2020', 3, 'matias.pena@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(66, '0003-0010', 'Zoe', 'Lozano', 'Escobar', 'Female', '2019', 4, 'zoe.escobar@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(67, '0004-0001', 'David', 'Silva', 'Vega', 'Male', '2018', 1, 'david.vega@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(68, '0004-0002', 'Luna', 'Gallegos', 'Contreras', 'Female', '2020', 2, 'luna.contreras@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(69, '0004-0003', 'Emilio', 'Valencia', 'Solis', 'Male', '2019', 3, 'emilio.solis@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(70, '0004-0004', 'Lucia', 'Pineda', 'Molina', 'Female', '2021', 4, 'lucia.molina@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(71, '0004-0005', 'Santiago', 'Acosta', 'Miranda', 'Male', '2018', 1, 'santiago.miranda@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(72, '0004-0006', 'Valeria', 'Zuniga', 'Rojas', 'Female', '2020', 2, 'valeria.rojas@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10'),
+(73, '0004-0007', 'Eduardo', 'Alvarado', 'Beltran', 'Male', '2019', 3, 'eduardo.beltran@example.com', NULL, NULL, 0, 'avatar.png', 1, '2025-05-10');
 
 -- --------------------------------------------------------
 
@@ -136,8 +136,21 @@ CREATE TABLE `archived_events` (
 --
 
 INSERT INTO `archived_events` (`id`, `title`, `content`, `schedule`, `banner`, `gform_link`, `archived_date`, `original_id`) VALUES
-(1, 'test', 'test', '2025-05-19 01:42:00', 'no-image.jpg', '', '2025-05-19 13:25:28', 10),
-(2, 'qwew', 'qwewe', '2025-05-19 14:25:00', 'no-image.jpg', '', '2025-05-19 13:25:51', 11);
+(19, 'qweqwe', 'qweqweqwe', '2025-05-19 20:00:00', 'no-image.jpg', '', '2025-05-19 19:06:34', 28),
+(20, 'qweqwe', 'qweqwe', '2025-05-19 20:09:00', 'no-image.jpg', '', '2025-05-19 20:08:10', 29),
+(21, 'qweqweqe', 'qweqwe', '2025-05-19 20:19:00', 'no-image.jpg', '', '2025-05-19 20:19:33', 30),
+(22, 'qweeqw', 'qweqwqwe', '2025-05-19 20:29:00', 'no-image.jpg', '', '2025-05-19 20:28:44', 31),
+(23, 'qweqwewe', 'qwqwe', '2025-05-19 21:40:00', 'no-image.jpg', '', '2025-05-19 20:39:04', 32),
+(24, 'qwqweqwe', 'qweqweqweqwe', '2025-05-19 20:50:00', 'no-image.jpg', '', '2025-05-19 20:46:52', 33),
+(25, 'qweqwe', 'qwqweqwee', '2025-05-19 20:59:00', 'no-image.jpg', '', '2025-05-19 20:52:57', 34),
+(26, 'qweqwe', 'qwweqwe', '2025-05-19 23:01:00', 'no-image.jpg', '', '2025-05-19 21:02:17', 35),
+(27, 'qweqwe', 'qweqwe', '2025-05-19 21:04:00', 'no-image.jpg', '', '2025-05-19 21:04:06', 36),
+(28, 'qwewewq', 'qweqwe', '2025-05-19 21:10:00', 'no-image.jpg', '', '2025-05-19 21:10:09', 37),
+(29, 'qweqweqwee', 'qweqwe', '2025-05-19 22:18:00', 'no-image.jpg', '', '2025-05-19 21:17:57', 38),
+(30, 'qwqweqwe', 'qweqwewqwe', '2025-05-29 22:19:00', 'no-image.jpg', '', '2025-05-19 21:18:28', 39),
+(31, 'qweqwe', 'qweqweqwe', '2025-05-19 21:27:00', 'no-image.jpg', '', '2025-05-19 21:26:52', 40),
+(32, 'qwqwe', 'qweqweqwe', '2025-05-19 21:41:00', 'no-image.jpg', '', '2025-05-19 21:42:08', 41),
+(33, 'qweqwee', 'qweqweqwe', '2025-05-19 22:51:00', 'no-image.jpg', '', '2025-05-19 22:50:49', 42);
 
 -- --------------------------------------------------------
 
@@ -211,7 +224,7 @@ INSERT INTO `events` (`id`, `title`, `content`, `schedule`, `banner`, `date_crea
 (5, 'test', 'test test', '2025-05-17 01:48:00', 'no-image-available.png', '2025-05-17 01:48:54', '', NULL),
 (6, 'qweqweqweqwe', 'qweqweqweqweqwe', '2025-05-17 01:49:00', 'no-image-available.png', '2025-05-17 01:49:07', '', NULL),
 (7, 'test12', 'qweqwewe', '2025-05-18 15:22:00', 'no-image-available.png', '2025-05-18 21:22:09', '', NULL),
-(8, 'eqwweqwe', 'qweqweqweqwe', '2025-05-18 21:22:00', 'no-image-available.png', '2025-05-18 21:22:16', '', NULL);
+(16, 'qweqwewe', 'qweqwee', '2025-05-19 18:30:00', 'no-image.jpg', '2025-05-19 18:30:11', '', '2025-05-20');
 
 -- --------------------------------------------------------
 
@@ -363,7 +376,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `alumni_id`, `name`, `username`, `password`, `type`, `auto_generated_pass`, `reset_token`, `token_expiry`, `is_default_password`) VALUES
 (1, 'admin', 'Administrator', 'admin', '0192023a7bbd73250516f069df18b500', 1, '', NULL, NULL, 1),
-(38, '0001-0001', 'Juan Cruz', 'juan.delacruz@example.com', 'e28587c6f82a0726be67fc39af212d72', 3, '5e11ed4f', NULL, NULL, 1),
+(38, '0001-0001', 'Juan Cruz', 'juan.delacruz@example.com', '2168ad5e463d9accb215edaafa31c8d9', 3, '5e11ed4f', NULL, NULL, 0),
 (39, '0001-0002', 'Maria Reyes', 'maria.reyes@example.com', 'c8e429150891b60f9c0f2c4a4259f45c', 3, '8eb65c43', NULL, NULL, 1),
 (40, '0001-0003', 'Pedro Lim', 'pedro.lim@example.com', 'bef8405a6f651bda7fa5fb2db2d841ef', 3, 'a61e07c4', NULL, NULL, 1),
 (41, '0001-0004', 'Ana Santos', 'ana.santos@example.com', '1ad04a7663f25d000052f01e007ea639', 3, 'e1c4a880', NULL, NULL, 1),
@@ -485,13 +498,13 @@ ALTER TABLE `alumni_officers`
 -- AUTO_INCREMENT for table `alumnus_bio`
 --
 ALTER TABLE `alumnus_bio`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- AUTO_INCREMENT for table `archived_events`
 --
 ALTER TABLE `archived_events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `careers`
@@ -509,7 +522,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `event_commits`
@@ -539,7 +552,7 @@ ALTER TABLE `gallery`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
