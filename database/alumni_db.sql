@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 16, 2025 at 08:48 PM
+-- Generation Time: May 19, 2025 at 08:10 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,6 +38,16 @@ CREATE TABLE `alumni_officers` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `alumni_officers`
+--
+
+INSERT INTO `alumni_officers` (`id`, `name`, `position`, `class_year`, `course`, `image_path`, `display_order`, `created_at`, `updated_at`) VALUES
+(3, 'Pres', 'President', '2025', 'BS Information Technology', '', 0, '2025-05-18 18:21:30', '2025-05-18 18:21:30'),
+(4, 'Last Pres', 'President', '2024', 'BS Information Technology', '', 0, '2025-05-18 18:21:44', '2025-05-18 18:21:44'),
+(5, 'Vice Pres', 'Vice President', '2025', '', '', 0, '2025-05-18 18:21:54', '2025-05-18 18:21:54'),
+(6, ':ast Vice Pres', 'Vice President', '2024', 'BS Information Technology', '', 0, '2025-05-18 18:22:03', '2025-05-18 18:22:03');
 
 -- --------------------------------------------------------
 
@@ -107,6 +117,31 @@ INSERT INTO `alumnus_bio` (`id`, `alumni_id`, `firstname`, `middlename`, `lastna
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `archived_events`
+--
+
+CREATE TABLE `archived_events` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `schedule` datetime NOT NULL,
+  `banner` varchar(255) NOT NULL DEFAULT 'no-image.jpg',
+  `gform_link` varchar(255) DEFAULT NULL,
+  `archived_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `original_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `archived_events`
+--
+
+INSERT INTO `archived_events` (`id`, `title`, `content`, `schedule`, `banner`, `gform_link`, `archived_date`, `original_id`) VALUES
+(1, 'test', 'test', '2025-05-19 01:42:00', 'no-image.jpg', '', '2025-05-19 13:25:28', 10),
+(2, 'qwew', 'qwewe', '2025-05-19 14:25:00', 'no-image.jpg', '', '2025-05-19 13:25:51', 11);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `careers`
 --
 
@@ -125,8 +160,8 @@ CREATE TABLE `careers` (
 --
 
 INSERT INTO `careers` (`id`, `company`, `location`, `job_title`, `description`, `user_id`, `date_created`) VALUES
-(1, 'IT Company', 'Home-Based', 'Web Developer', '&lt;p style=&quot;-webkit-tap-highlight-color: rgba(0, 0, 0, 0); margin-top: 1.5em; margin-bottom: 1.5em; line-height: 1.5; animation: 1000ms linear 0s 1 normal none running fadeInLorem;&quot;&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sagittis eu volutpat odio facilisis mauris sit amet massa vitae. In tellus integer feugiat scelerisque varius morbi enim. Orci eu lobortis elementum nibh tellus molestie nunc. Vulputate ut pharetra sit amet aliquam id diam maecenas ultricies. Lacus sed viverra tellus in hac habitasse platea dictumst vestibulum. Eleifend donec pretium vulputate sapien nec. Enim praesent elementum facilisis leo vel fringilla est ullamcorper. Quam adipiscing vitae proin sagittis nisl rhoncus. Sed viverra ipsum nunc aliquet bibendum. Enim ut sem viverra aliquet eget sit amet tellus. Integer feugiat scelerisque varius morbi enim nunc faucibus.&lt;/p&gt;&lt;p style=&quot;-webkit-tap-highlight-color: rgba(0, 0, 0, 0); margin-top: 1.5em; margin-bottom: 1.5em; line-height: 1.5; animation: 1000ms linear 0s 1 normal none running fadeInLorem;&quot;&gt;Viverra justo nec ultrices dui. Leo vel orci porta non pulvinar neque laoreet. Id semper risus in hendrerit gravida rutrum quisque non tellus. Sit amet consectetur adipiscing elit ut. Id neque aliquam vestibulum morbi blandit cursus risus. Tristique senectus et netus et malesuada. Amet aliquam id diam maecenas ultricies mi eget mauris. Morbi tristique senectus et netus et malesuada. Diam phasellus vestibulum lorem sed risus. Tempor orci dapibus ultrices in. Mi sit amet mauris commodo quis imperdiet. Quisque sagittis purus sit amet volutpat. Vehicula ipsum a arcu cursus. Ornare quam viverra orci sagittis eu volutpat odio facilisis. Id volutpat lacus laoreet non curabitur. Cursus euismod quis viverra nibh cras pulvinar mattis nunc. Id aliquet lectus proin nibh nisl condimentum id venenatis. Eget nulla facilisi etiam dignissim diam quis enim lobortis. Lacus suspendisse faucibus interdum posuere lorem ipsum dolor sit amet.&lt;/p&gt;', '3', '2020-10-15 14:14:27'),
-(2, 'Sample Company', 'Sample location', 'IT Specialist', '&lt;p style=&quot;margin-top: 1.5em; margin-bottom: 1.5em; margin-right: unset; margin-left: unset; color: rgb(68, 68, 68); font-family: &amp;quot;Open Sans&amp;quot;, sans-serif; font-size: 16px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); line-height: 1.5; animation: 1000ms linear 0s 1 normal none running fadeInLorem;&quot;&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sagittis eu volutpat odio facilisis mauris sit amet massa vitae. In tellus integer feugiat scelerisque varius morbi enim. Orci eu lobortis elementum nibh tellus molestie nunc. Vulputate ut pharetra sit amet aliquam id diam maecenas ultricies. Lacus sed viverra tellus in hac habitasse platea dictumst vestibulum. Eleifend donec pretium vulputate sapien nec. Enim praesent elementum facilisis leo vel fringilla est ullamcorper. Quam adipiscing vitae proin sagittis nisl rhoncus. Sed viverra ipsum nunc aliquet bibendum. Enim ut sem viverra aliquet eget sit amet tellus. Integer feugiat scelerisque varius morbi enim nunc faucibus.&lt;/p&gt;&lt;p style=&quot;margin-top: 1.5em; margin-bottom: 1.5em; margin-right: unset; margin-left: unset; color: rgb(68, 68, 68); font-family: &amp;quot;Open Sans&amp;quot;, sans-serif; font-size: 16px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); line-height: 1.5; animation: 1000ms linear 0s 1 normal none running fadeInLorem;&quot;&gt;Viverra justo nec ultrices dui. Leo vel orci porta non pulvinar neque laoreet. Id semper risus in hendrerit gravida rutrum quisque non tellus. Sit amet consectetur adipiscing elit ut. Id neque aliquam vestibulum morbi blandit cursus risus. Tristique senectus et netus et malesuada. Amet aliquam id diam maecenas ultricies mi eget mauris. Morbi tristique senectus et netus et malesuada. Diam phasellus vestibulum lorem sed risus. Tempor orci dapibus ultrices in. Mi sit amet mauris commodo quis imperdiet. Quisque sagittis purus sit amet volutpat. Vehicula ipsum a arcu cursus. Ornare quam viverra orci sagittis eu volutpat odio facilisis. Id volutpat lacus laoreet non curabitur. Cursus euismod quis viverra nibh cras pulvinar mattis nunc. Id aliquet lectus proin nibh nisl condimentum id venenatis. Eget nulla facilisi etiam dignissim diam quis enim lobortis. Lacus suspendisse faucibus interdum posuere lorem ipsum dolor sit amet.&lt;/p&gt;', '1', '2020-10-15 15:05:37');
+(3, 'TEst', 'Pasig City (WFH)', 'Software Engineer', 'test\\r\\n', '1', '2025-05-19 00:40:00'),
+(5, 'TEst', 'Pasig City (Onsite)', 'qwew', 'test', '0001-0001', '2025-05-19 04:22:19');
 
 -- --------------------------------------------------------
 
@@ -163,17 +198,20 @@ CREATE TABLE `events` (
   `schedule` datetime NOT NULL,
   `banner` text NOT NULL,
   `date_created` datetime NOT NULL DEFAULT current_timestamp(),
-  `gform_link` varchar(200) NOT NULL
+  `gform_link` varchar(200) NOT NULL,
+  `archive_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `events`
 --
 
-INSERT INTO `events` (`id`, `title`, `content`, `schedule`, `banner`, `date_created`, `gform_link`) VALUES
-(4, 'Test', 'test\r\n', '2025-05-17 01:48:00', 'no-image-available.png', '2025-05-17 01:48:44', ''),
-(5, 'test', 'test test', '2025-05-17 01:48:00', 'no-image-available.png', '2025-05-17 01:48:54', ''),
-(6, 'qweqweqweqwe', 'qweqweqweqweqwe', '2025-05-17 01:49:00', 'no-image-available.png', '2025-05-17 01:49:07', '');
+INSERT INTO `events` (`id`, `title`, `content`, `schedule`, `banner`, `date_created`, `gform_link`, `archive_date`) VALUES
+(4, 'Test', 'test\r\n', '2025-05-17 01:48:00', 'no-image-available.png', '2025-05-17 01:48:44', '', NULL),
+(5, 'test', 'test test', '2025-05-17 01:48:00', 'no-image-available.png', '2025-05-17 01:48:54', '', NULL),
+(6, 'qweqweqweqwe', 'qweqweqweqweqwe', '2025-05-17 01:49:00', 'no-image-available.png', '2025-05-17 01:49:07', '', NULL),
+(7, 'test12', 'qweqwewe', '2025-05-18 15:22:00', 'no-image-available.png', '2025-05-18 21:22:09', '', NULL),
+(8, 'eqwweqwe', 'qweqweqweqwe', '2025-05-18 21:22:00', 'no-image-available.png', '2025-05-18 21:22:16', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -215,7 +253,8 @@ CREATE TABLE `forum_comments` (
 INSERT INTO `forum_comments` (`id`, `topic_id`, `comment`, `user_id`, `date_created`) VALUES
 (1, 3, 'Sample updated Comment', '3', '2020-10-15 15:46:03'),
 (3, 3, 'Sample', '1', '2020-10-16 08:48:02'),
-(5, 0, '', '1', '2020-10-16 09:49:34');
+(5, 0, '', '1', '2020-10-16 09:49:34'),
+(6, 8, 'test comment\r\n', '0001-0002', '2025-05-19 04:45:47');
 
 -- --------------------------------------------------------
 
@@ -238,7 +277,11 @@ CREATE TABLE `forum_topics` (
 INSERT INTO `forum_topics` (`id`, `title`, `description`, `user_id`, `date_created`) VALUES
 (2, 'Sample Topic 2', 'lorem', '3', '2020-10-15 15:20:51'),
 (3, 'Sample Topic 3', 'lorem', '3', '2020-10-15 15:22:30'),
-(4, 'Topic by Admin', 'lorem', '1', '2020-10-16 08:31:45');
+(4, 'Topic by Admin', 'lorem', '1', '2020-10-16 08:31:45'),
+(5, 'test', 'test', '1', '2025-05-19 01:57:33'),
+(6, 'test', 'testtt', '1', '2025-05-19 01:57:38'),
+(7, 'teestttt', 'test', '1', '2025-05-19 01:57:44'),
+(8, 'Test topic', 'ewan', '0001-0001', '2025-05-19 04:45:08');
 
 -- --------------------------------------------------------
 
@@ -259,7 +302,15 @@ CREATE TABLE `gallery` (
 --
 
 INSERT INTO `gallery` (`id`, `title`, `description`, `image_path`, `upload_date`) VALUES
-(1, 'Campus View', 'Beautiful view of our university campus', 'images/plpasigg.jpg', '2025-05-08 12:15:39');
+(1, 'Campus View', 'Beautiful view of our university campus', 'images/plpasigg.jpg', '2025-05-08 12:15:39'),
+(2, 'qweqwe', 'qweqweqwe', 'uploads/gallery/6829e0389e2e9_Screenshot 2025-05-16 202338.png', '2025-05-18 21:27:20'),
+(3, 'qweqwe', 'qweqweqweqwewqew', 'uploads/gallery/6829e04d868ab_Screenshot 2024-08-26 094918.png', '2025-05-18 21:27:41'),
+(4, 'qweqweqweqwe', 'qweqweqwe', 'uploads/gallery/6829e05dc1fa8_Screenshot 2024-08-27 192135.png', '2025-05-18 21:27:57'),
+(5, 'qweqwe', 'qweqwe', 'uploads/gallery/6829e06d1bd4c_18.1.png', '2025-05-18 21:28:13'),
+(6, 'qweqw', 'eqweqwew', 'uploads/gallery/6829e08ef0bca_Screenshot 2025-05-16 201530.png', '2025-05-18 21:28:46'),
+(7, 'test', 'eqweqwewewe', 'uploads/gallery/6829e09d73b9e_Screenshot 2025-05-03 022127.png', '2025-05-18 21:29:01'),
+(8, 'test test', 'eqweqwewewe', 'uploads/gallery/682a394dc2a7f_exce5.png', '2025-05-19 03:47:25'),
+(9, 'test test test test', 'eqweqwewewe', 'uploads/gallery/682a3a30c9b6c_Screenshot (1).png', '2025-05-19 03:47:45');
 
 -- --------------------------------------------------------
 
@@ -273,15 +324,19 @@ CREATE TABLE `system_settings` (
   `email` varchar(200) NOT NULL,
   `contact` varchar(20) NOT NULL,
   `cover_img` text NOT NULL,
-  `about_content` text NOT NULL
+  `about_content` text NOT NULL,
+  `facebook` varchar(255) DEFAULT NULL,
+  `twitter` varchar(255) DEFAULT NULL,
+  `instagram` varchar(255) DEFAULT NULL,
+  `linkedin` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `system_settings`
 --
 
-INSERT INTO `system_settings` (`id`, `name`, `email`, `contact`, `cover_img`, `about_content`) VALUES
-(1, 'Alumni Management System', 'info@sample.comm', '+6948 8542 623', '1602738120_pngtree-purple-hd-business-banner-image_5493.jpg', 'The Pamantasan ng Lungsod ng Pasig Alumni Portal is designed to strengthen the bond between the university and its graduates. We believe in fostering a vibrant community where alumni can connect, collaborate, and contribute to the growth of each other and the institution.\r\n\r\nThrough this platform, we aim to create a supportive network that spans across generations, industries, and geographical boundaries, uniting all PLP graduates under one virtual roof.');
+INSERT INTO `system_settings` (`id`, `name`, `email`, `contact`, `cover_img`, `about_content`, `facebook`, `twitter`, `instagram`, `linkedin`) VALUES
+(1, 'Alumni Management System', 'info@sample.comm', '+6948 8542 623', 'uploads/1747595420_Screenshot 2025-04-23 235231.png', 'The Pamantasan ng Lungsod ng Pasig Alumni Portal is designed to strengthen the bond between the university and its graduates. We believe in fostering a vibrant community where alumni can connect, collaborate, and contribute to the growth of each other and the institution.\r\n\r\nThrough this platform, we aim to create a supportive network that spans across generations, industries, and geographical boundaries, uniting all PLP graduates under one virtual roof.', 'https://www.facebook.com/', 'https://www.facebook.com/', '', '');
 
 -- --------------------------------------------------------
 
@@ -297,6 +352,8 @@ CREATE TABLE `users` (
   `password` text NOT NULL,
   `type` tinyint(1) NOT NULL DEFAULT 3 COMMENT '1=Admin,2=Alumni officer, 3= alumnus',
   `auto_generated_pass` text NOT NULL,
+  `reset_token` varchar(64) DEFAULT NULL,
+  `token_expiry` datetime DEFAULT NULL,
   `is_default_password` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=Using default password, 0=Password changed'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -304,45 +361,45 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `alumni_id`, `name`, `username`, `password`, `type`, `auto_generated_pass`) VALUES
-(1, 'admin', 'Administrator', 'admin', '0192023a7bbd73250516f069df18b500', 1, ''),
-(38, '0001-0001', 'Juan Cruz', 'juan.delacruz@example.com', 'e28587c6f82a0726be67fc39af212d72', 3, '5e11ed4f'),
-(39, '0001-0002', 'Maria Reyes', 'maria.reyes@example.com', 'c8e429150891b60f9c0f2c4a4259f45c', 3, '8eb65c43'),
-(40, '0001-0003', 'Pedro Lim', 'pedro.lim@example.com', 'bef8405a6f651bda7fa5fb2db2d841ef', 3, 'a61e07c4'),
-(41, '0001-0004', 'Ana Santos', 'ana.santos@example.com', '1ad04a7663f25d000052f01e007ea639', 3, 'e1c4a880'),
-(42, '0001-0005', 'Carlos Reyes', 'carlos.reyes@example.com', '99a065970af500451c2f2aa6ae28635b', 3, 'e3618e93'),
-(43, '0001-0006', 'Sofia Gonzales', 'sofia.gonzales@example.com', '4d9def0e91a410152fa739ff2abe847c', 3, 'd2f0b5a3'),
-(44, '0001-0007', 'Miguel Tan', 'miguel.tan@example.com', '446a0fbf3d3467fde88b1bc3acfea253', 3, '2778be3a'),
-(45, '0001-0008', 'Isabella Garcia', 'isabella.garcia@example.com', '00e38ffcebd8f9a8f0e7db538baff4aa', 3, 'c92e080d'),
-(46, '0001-0009', 'Gabriel Hernandez', 'gabriel.hernandez@example.com', 'df56dbd4806073663ab493317d6a42cf', 3, '00bc4905'),
-(47, '0001-0010', 'Camila Rodriguez', 'camila.rodriguez@example.com', 'f0a50414002e2cc49a06da762a268bfe', 3, 'dbd77082'),
-(48, '0002-0001', 'Rafael Martinez', 'rafael.martinez@example.com', '5900b0b2891cc4803af48aeb087b2862', 3, 'bc327096'),
-(49, '0002-0002', 'Victoria Flores', 'victoria.flores@example.com', 'b79e1e0809e884b72f5ec9a37b90eab6', 3, 'dd729cbb'),
-(50, '0002-0003', 'Alejandro Sanchez', 'alejandro.sanchez@example.com', '0b76c56852120cccab79997491b5b6d6', 3, 'cf7cf52d'),
-(51, '0002-0004', 'Valentina Rivera', 'valentina.rivera@example.com', '06fe4a93674045ffb0cd3f62be594a7e', 3, '709a9e2d'),
-(52, '0002-0005', 'Daniel Gutierrez', 'daniel.gutierrez@example.com', '73bce577ac9341efe4787fdf3147f73b', 3, '56213da4'),
-(53, '0002-0006', 'Natalia Castillo', 'natalia.castillo@example.com', '5851ab6b3afaf0b8f531bb65c87e9dcb', 3, 'd5a0b95f'),
-(54, '0002-0007', 'Sebastian Vargas', 'sebastian.vargas@example.com', '38e0c2a8de7bf33ca33047f9d9dcb331', 3, '31dc5ad9'),
-(55, '0002-0008', 'Olivia Romero', 'olivia.romero@example.com', '294f68534cb34783526107d81cbe17ca', 3, 'a99b3c88'),
-(56, '0002-0009', 'Mateo Herrera', 'mateo.herrera@example.com', 'bf8aa47d37ca7abe88a75612e88e1263', 3, '0b2c6822'),
-(57, '0002-0010', 'Emma Ruiz', 'emma.ruiz@example.com', 'e98c15628385c109515553f35df7fe5c', 3, '196059c0'),
-(58, '0003-0001', 'Samuel Medina', 'samuel.medina@example.com', 'cb63ced13efcbf73f87942227810af40', 3, '3f32c429'),
-(59, '0003-0002', 'Sophia Fernandez', 'sophia.fernandez@example.com', '72b85e3947d6fc7c93063a6ff3b71794', 3, '62318c1b'),
-(60, '0003-0003', 'Lucas Ramirez', 'lucas.ramirez@example.com', 'd034c47c2aeb37144e0d0faed81de405', 3, '6d903002'),
-(61, '0003-0004', 'Ava Mendoza', 'ava.mendoza@example.com', '3649709f5ddd445e371d956ef6aa69f1', 3, '73aa64f3'),
-(62, '0003-0005', 'Nicolas Salazar', 'nicolas.salazar@example.com', 'c8a7386544d1a5316eacf31ffc9a7df5', 3, '5caaa092'),
-(63, '0003-0006', 'Chloe Espinoza', 'chloe.espinoza@example.com', '1c056a2ca532eb5e09ddf22ddda3460e', 3, '6a5fef33'),
-(64, '0003-0007', 'Benjamin Campos', 'benjamin.campos@example.com', '995b1a4413061c60d03373d8237a7a9a', 3, '8a0ced24'),
-(65, '0003-0008', 'Mia Delgado', 'mia.delgado@example.com', '0adc191dc43c9d609a541510c7aa0f33', 3, 'cb67e56c'),
-(66, '0003-0009', 'Matias Pena', 'matias.pena@example.com', '6e0ac24f5c31c3d6befa1f826bfac169', 3, '7b6b8d74'),
-(67, '0003-0010', 'Zoe Escobar', 'zoe.escobar@example.com', 'f2db443c5feef36cef0454fd4da1e916', 3, '3830ad4d'),
-(68, '0004-0001', 'David Vega', 'david.vega@example.com', '281d1e7f616045c154eb73a55e95a6e7', 3, '34bdbe15'),
-(69, '0004-0002', 'Luna Contreras', 'luna.contreras@example.com', '3e87d8ce96a8df521d5b80a598c21f6d', 3, '7140afe3'),
-(70, '0004-0003', 'Emilio Solis', 'emilio.solis@example.com', '413f9b33dbd815d6fbba3674ca26048e', 3, '6e43f95f'),
-(71, '0004-0004', 'Lucia Molina', 'lucia.molina@example.com', 'fd0dadbe74551b5be81f99edaf428202', 3, '6f743175'),
-(72, '0004-0005', 'Santiago Miranda', 'santiago.miranda@example.com', '2e736e04abf5c40d0c8d49d335a45fa6', 3, 'bef5ab78'),
-(73, '0004-0006', 'Valeria Rojas', 'valeria.rojas@example.com', '5f8aa1f273e5864564d87a12685b643c', 3, '8c7e1fab'),
-(74, '0004-0007', 'Eduardo Beltran', 'eduardo.beltran@example.com', 'a8faa0b7cfa848ed22cc366e70603460', 3, 'd3759345');
+INSERT INTO `users` (`id`, `alumni_id`, `name`, `username`, `password`, `type`, `auto_generated_pass`, `reset_token`, `token_expiry`, `is_default_password`) VALUES
+(1, 'admin', 'Administrator', 'admin', '0192023a7bbd73250516f069df18b500', 1, '', NULL, NULL, 1),
+(38, '0001-0001', 'Juan Cruz', 'juan.delacruz@example.com', 'e28587c6f82a0726be67fc39af212d72', 3, '5e11ed4f', NULL, NULL, 1),
+(39, '0001-0002', 'Maria Reyes', 'maria.reyes@example.com', 'c8e429150891b60f9c0f2c4a4259f45c', 3, '8eb65c43', NULL, NULL, 1),
+(40, '0001-0003', 'Pedro Lim', 'pedro.lim@example.com', 'bef8405a6f651bda7fa5fb2db2d841ef', 3, 'a61e07c4', NULL, NULL, 1),
+(41, '0001-0004', 'Ana Santos', 'ana.santos@example.com', '1ad04a7663f25d000052f01e007ea639', 3, 'e1c4a880', NULL, NULL, 1),
+(42, '0001-0005', 'Carlos Reyes', 'carlos.reyes@example.com', '99a065970af500451c2f2aa6ae28635b', 3, 'e3618e93', NULL, NULL, 1),
+(43, '0001-0006', 'Sofia Gonzales', 'sofia.gonzales@example.com', '4d9def0e91a410152fa739ff2abe847c', 3, 'd2f0b5a3', NULL, NULL, 1),
+(44, '0001-0007', 'Miguel Tan', 'miguel.tan@example.com', '446a0fbf3d3467fde88b1bc3acfea253', 3, '2778be3a', NULL, NULL, 1),
+(45, '0001-0008', 'Isabella Garcia', 'isabella.garcia@example.com', '00e38ffcebd8f9a8f0e7db538baff4aa', 3, 'c92e080d', NULL, NULL, 1),
+(46, '0001-0009', 'Gabriel Hernandez', 'gabriel.hernandez@example.com', 'df56dbd4806073663ab493317d6a42cf', 3, '00bc4905', NULL, NULL, 1),
+(47, '0001-0010', 'Camila Rodriguez', 'camila.rodriguez@example.com', 'f0a50414002e2cc49a06da762a268bfe', 3, 'dbd77082', NULL, NULL, 1),
+(48, '0002-0001', 'Rafael Martinez', 'rafael.martinez@example.com', '5900b0b2891cc4803af48aeb087b2862', 3, 'bc327096', NULL, NULL, 1),
+(49, '0002-0002', 'Victoria Flores', 'victoria.flores@example.com', 'b79e1e0809e884b72f5ec9a37b90eab6', 3, 'dd729cbb', NULL, NULL, 1),
+(50, '0002-0003', 'Alejandro Sanchez', 'alejandro.sanchez@example.com', '0b76c56852120cccab79997491b5b6d6', 3, 'cf7cf52d', NULL, NULL, 1),
+(51, '0002-0004', 'Valentina Rivera', 'valentina.rivera@example.com', '06fe4a93674045ffb0cd3f62be594a7e', 3, '709a9e2d', NULL, NULL, 1),
+(52, '0002-0005', 'Daniel Gutierrez', 'daniel.gutierrez@example.com', '73bce577ac9341efe4787fdf3147f73b', 3, '56213da4', NULL, NULL, 1),
+(53, '0002-0006', 'Natalia Castillo', 'natalia.castillo@example.com', '5851ab6b3afaf0b8f531bb65c87e9dcb', 3, 'd5a0b95f', NULL, NULL, 1),
+(54, '0002-0007', 'Sebastian Vargas', 'sebastian.vargas@example.com', '38e0c2a8de7bf33ca33047f9d9dcb331', 3, '31dc5ad9', NULL, NULL, 1),
+(55, '0002-0008', 'Olivia Romero', 'olivia.romero@example.com', '294f68534cb34783526107d81cbe17ca', 3, 'a99b3c88', NULL, NULL, 1),
+(56, '0002-0009', 'Mateo Herrera', 'mateo.herrera@example.com', 'bf8aa47d37ca7abe88a75612e88e1263', 3, '0b2c6822', NULL, NULL, 1),
+(57, '0002-0010', 'Emma Ruiz', 'emma.ruiz@example.com', 'e98c15628385c109515553f35df7fe5c', 3, '196059c0', NULL, NULL, 1),
+(58, '0003-0001', 'Samuel Medina', 'samuel.medina@example.com', 'cb63ced13efcbf73f87942227810af40', 3, '3f32c429', NULL, NULL, 1),
+(59, '0003-0002', 'Sophia Fernandez', 'sophia.fernandez@example.com', '72b85e3947d6fc7c93063a6ff3b71794', 3, '62318c1b', NULL, NULL, 1),
+(60, '0003-0003', 'Lucas Ramirez', 'lucas.ramirez@example.com', 'd034c47c2aeb37144e0d0faed81de405', 3, '6d903002', NULL, NULL, 1),
+(61, '0003-0004', 'Ava Mendoza', 'ava.mendoza@example.com', '3649709f5ddd445e371d956ef6aa69f1', 3, '73aa64f3', NULL, NULL, 1),
+(62, '0003-0005', 'Nicolas Salazar', 'nicolas.salazar@example.com', 'c8a7386544d1a5316eacf31ffc9a7df5', 3, '5caaa092', NULL, NULL, 1),
+(63, '0003-0006', 'Chloe Espinoza', 'chloe.espinoza@example.com', '1c056a2ca532eb5e09ddf22ddda3460e', 3, '6a5fef33', NULL, NULL, 1),
+(64, '0003-0007', 'Benjamin Campos', 'benjamin.campos@example.com', '995b1a4413061c60d03373d8237a7a9a', 3, '8a0ced24', NULL, NULL, 1),
+(65, '0003-0008', 'Mia Delgado', 'mia.delgado@example.com', '0adc191dc43c9d609a541510c7aa0f33', 3, 'cb67e56c', NULL, NULL, 1),
+(66, '0003-0009', 'Matias Pena', 'matias.pena@example.com', '6e0ac24f5c31c3d6befa1f826bfac169', 3, '7b6b8d74', NULL, NULL, 1),
+(67, '0003-0010', 'Zoe Escobar', 'zoe.escobar@example.com', 'f2db443c5feef36cef0454fd4da1e916', 3, '3830ad4d', NULL, NULL, 1),
+(68, '0004-0001', 'David Vega', 'david.vega@example.com', '281d1e7f616045c154eb73a55e95a6e7', 3, '34bdbe15', NULL, NULL, 1),
+(69, '0004-0002', 'Luna Contreras', 'luna.contreras@example.com', '3e87d8ce96a8df521d5b80a598c21f6d', 3, '7140afe3', NULL, NULL, 1),
+(70, '0004-0003', 'Emilio Solis', 'emilio.solis@example.com', '413f9b33dbd815d6fbba3674ca26048e', 3, '6e43f95f', NULL, NULL, 1),
+(71, '0004-0004', 'Lucia Molina', 'lucia.molina@example.com', 'fd0dadbe74551b5be81f99edaf428202', 3, '6f743175', NULL, NULL, 1),
+(72, '0004-0005', 'Santiago Miranda', 'santiago.miranda@example.com', '2e736e04abf5c40d0c8d49d335a45fa6', 3, 'bef5ab78', NULL, NULL, 1),
+(73, '0004-0006', 'Valeria Rojas', 'valeria.rojas@example.com', '5f8aa1f273e5864564d87a12685b643c', 3, '8c7e1fab', NULL, NULL, 1),
+(74, '0004-0007', 'Eduardo Beltran', 'eduardo.beltran@example.com', 'a8faa0b7cfa848ed22cc366e70603460', 3, 'd3759345', NULL, NULL, 1);
 
 --
 -- Indexes for dumped tables
@@ -358,6 +415,12 @@ ALTER TABLE `alumni_officers`
 -- Indexes for table `alumnus_bio`
 --
 ALTER TABLE `alumnus_bio`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `archived_events`
+--
+ALTER TABLE `archived_events`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -416,31 +479,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `alumni_officers`
 --
 ALTER TABLE `alumni_officers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `alumnus_bio`
 --
 ALTER TABLE `alumnus_bio`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+
+--
+-- AUTO_INCREMENT for table `archived_events`
+--
+ALTER TABLE `archived_events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `careers`
 --
 ALTER TABLE `careers`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `event_commits`
@@ -452,25 +521,25 @@ ALTER TABLE `event_commits`
 -- AUTO_INCREMENT for table `forum_comments`
 --
 ALTER TABLE `forum_comments`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `forum_topics`
 --
 ALTER TABLE `forum_topics`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `gallery`
 --
 ALTER TABLE `gallery`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
